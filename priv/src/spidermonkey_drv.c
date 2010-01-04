@@ -116,7 +116,12 @@ static void process(ErlDrvData handle, ErlIOVec *ev) {
     char *filename = read_string(&data);
     char *code = read_string(&data);
     result = sm_eval(dd->vm, filename, code, 1);
-    send_string_response(dd, result);
+    if (strstr(result, "{\"error\"") != NULL) {
+      send_error_string_response(dd, result);
+    }
+    else {
+      send_string_response(dd, result);
+    }
     driver_free(filename);
     driver_free(code);
     driver_free(result);

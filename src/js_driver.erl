@@ -54,7 +54,7 @@ define_js(Ctx, FileName, Js, Timeout) when is_binary(FileName),
                                            is_binary(Js) ->
   case call_driver(Ctx, "dj", [FileName, Js], Timeout) of
     {error, ErrorJson} when is_binary(ErrorJson) ->
-      {struct, Error} = mochijson2:decode(ErrorJson),
+      {struct, [{<<"error">>, {struct, Error}}]} = mochijson2:decode(ErrorJson),
       {error, Error};
     Result ->
       Result
@@ -71,7 +71,7 @@ eval_js(Ctx, Js, Timeout) when is_binary(Js) ->
     {ok, Result} ->
       {ok, mochijson2:decode(Result)};
     {error, ErrorJson} when is_binary(ErrorJson) ->
-      {struct, Error} = mochijson2:decode(ErrorJson),
+      {struct, [{<<"error">>, {struct, Error}}]} = mochijson2:decode(ErrorJson),
       {error, Error};
     Error ->
       Error

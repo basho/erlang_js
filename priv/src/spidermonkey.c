@@ -77,7 +77,7 @@ char *error_to_json(const spidermonkey_error *error) {
   /* Allocate 1K to build error (hopefully that's enough!) */
   int size = sizeof(char) * 1024;
   char *retval = (char *) driver_alloc(size);
-  snprintf(retval, size, "{\"lineno\": %d, \"message\": \"%s\", \"source\": \"%s\"}", error->lineno,
+  snprintf(retval, size, "{\"error\": {\"lineno\": %d, \"message\": \"%s\", \"source\": \"%s\"}}", error->lineno,
 	   error->msg, error->offending_source);
   return retval;
 }
