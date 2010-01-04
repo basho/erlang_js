@@ -1,0 +1,54 @@
+SHELL = /bin/sh
+VPATH = @srcdir@
+
+LDFLAGS_COMMON=
+CFLAGS_COMMON=-Wall -O2 -DXP_UNIX -I@SPIDERMONKEY_HEADERS@ @ERL_FLAGS@ -I.
+
+top_srcdir = @top_srcdir@
+srcdir = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = $(exec_prefix)/bin
+infodir = $(prefix)/info
+libdir = $(prefix)/lib/gnudl
+mandir = $(prefix)/man/man1
+CFLAGS = @CFLAGS@ $(CFLAGS_COMMON)
+
+ifeq ($(shell uname),Linux)
+	ARCH = linux
+	LDFLAGS = $(LDFLAGS_COMMON) -shared
+else
+	ARCH = macosx
+	LDFLAGS = $(LDFLAGS_COMMON) -dynamic -bundle -undefined suppress -flat_namespace
+endif
+
+
+CC = @CC@
+CPPFLAGS = @CPPFLAGS@ $(CFLAGS_COMMON)
+LIBS = @LIBS@
+PACKAGE_NAME = @PACKAGE_NAME@
+PACKAGE_VERSION = @PACKAGE_VERSION@
+
+OUTPUTFILES := $(patsubst %_drv.c, %_drv.so, $(wildcard *_drv.c))
+
+DEFS = -DHAVE_CONFIG_H
+
+ERLDIR = @ERLDIR@
+
+
+all: $(OUTPUTFILES)
+
+debug:
+	$(MAKE) DEBUG=-DDEBUG
+
+.SUFFIXES: .o .c .h
+
+%_drv.so: %_drv.o driver_comm.o spidermonkey.o
+	$(CC) $(CFLAGS) $(DEFS) $(DEBUG) $(LDFLAGS) -o ../$@ $^ @LIBEI@ @SPIDERMONKEY_LIB@/libjs.a @SPIDERMONKEY_LIB@/libnspr4.a
+.c.o:
+	$(CC) $(CFLAGS) $(DEFS) $(DEBUG) -c $<
+
+clean:
+	rm -rf *.o *.a $(OUTPUTFILES)
+	rm -f *flymake*
+	rm -f ../*.so

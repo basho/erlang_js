@@ -1,0 +1,30 @@
+APP = erlang_js
+DRIVER_NAME=spidermonkey
+
+all: compile
+
+tests: compile
+	@cd tests;erl -make
+	@erl -noshell -boot start_sasl -pa ebin -s erlang_js -eval 'test_suite:test().' -s init stop
+	@rm -f ebin/test_* ebin/*_tests.erl
+
+compile: priv/$(DRIVER_NAME)_drv.so ebin
+	@cd src;erl -make
+	@cp src/$(APP).app ebin
+
+priv/$(DRIVER_NAME)_drv.so:
+	@cd priv/src;make
+ebin:
+	@mkdir ebin
+
+clean:
+	@rm -rf ebin doc autom4te.cache
+	@rm -f config.status config.log
+	@cd priv/src;make clean
+
+distclean: clean
+	rm -f priv/src/Makefile
+	rm -f Makefile
+
+doc:
+	@erl -noshell -run edoc_run application '$(APP)' '"."' '[]'
