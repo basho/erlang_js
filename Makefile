@@ -5,10 +5,6 @@ tests: compile
 	@erl -noshell -boot start_sasl -pa ebin -s erlang_js -eval 'test_suite:test().' -s init stop
 	@rm -f ebin/test_* ebin/*_tests.erl
 
-compile: priv/spidermonkey_drv.so ebin
-	@cd src;erl -make
-	@cp src/erlang_js.app ebin
-
 priv/spidermonkey_drv.so:
 	@cd priv/src;./configure;make
 ebin:

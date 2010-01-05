@@ -54,13 +54,6 @@ static void send_ok_response(spidermonkey_drv_t *dd) {
   send_output(dd->port, terms, sizeof(terms) / sizeof(terms[0]));
 }
 
-static void send_error_response(spidermonkey_drv_t *dd, const char *atom_err) {
-  ErlDrvTermData terms[] = {ERL_DRV_ATOM, dd->atom_error,
-			    ERL_DRV_ATOM, driver_mk_atom((char *) atom_err),
-			    ERL_DRV_TUPLE, 2};
-  send_output(dd->port, terms, sizeof(terms) / sizeof(terms[0]));
-}
-
 static void send_error_string_response(spidermonkey_drv_t *dd, const char *msg) {
   ErlDrvTermData terms[] = {ERL_DRV_ATOM, dd->atom_error,
 			    ERL_DRV_BUF2BINARY, (ErlDrvTermData) msg, strlen(msg),
