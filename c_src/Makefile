@@ -32,8 +32,7 @@ deps/js:
 	@tar -C deps -xzf js-1.8.0-rc1.tar.gz
 
 dist:
-	@rm -rf *.o *.a $(OUTPUTFILES)
-	@rm -rf config.status config.log autom4te.cache
+	@rm -f libjs.a libnspr4.a
 	@rm -f *flymake*
 	@rm -rf include
 	@rm -rf deps
