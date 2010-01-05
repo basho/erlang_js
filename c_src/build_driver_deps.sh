@@ -3,7 +3,7 @@
 set -e
 
 if [ `basename $PWD` != "src" ]; then
-    pushd priv/src
+    pushd c_src
 fi
 
 unset CFLAGS LDFLAGS

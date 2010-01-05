@@ -1,13 +1,13 @@
 # This Makefile builds the dependencies (libjs and libnspr) needed by
 # spidermonkey_drv.so
 
-js: ../libjs.a
+js: libjs.a
 
-../libnspr4.a: deps/nspr_release/dist/lib/libnspr4.a
-	@cp deps/nspr_release/dist/lib/libnspr4.a ..
+libnspr4.a: deps/nspr_release/dist/lib/libnspr4.a
+	@cp deps/nspr_release/dist/lib/libnspr4.a .
 
-../libjs.a: ../libnspr4.a js/src/libjs.a
-	@cp deps/js/src/libjs.a ..
+libjs.a: libnspr4.a js/src/libjs.a
+	@cp deps/js/src/libjs.a .
 
 deps/nspr_release/dist/lib/libnspr4.a: deps/mozilla deps/nspr_release
 	@cd deps/nspr_release;../mozilla/nsprpub/configure --disable-debug --enable-optimize;make
@@ -41,5 +41,5 @@ dist:
 jsclean:
 	@rm -rf deps
 	@rm -f *flymake*
-	@rm -f ../*.a
+	@rm -f libjs.a libnspr4.a
 	@rm -rf include
