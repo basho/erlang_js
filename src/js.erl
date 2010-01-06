@@ -32,11 +32,16 @@ build_bindings([{VarName, Value}|T], Accum) ->
                        false ->
                            VarName
                    end,
-    build_bindings(T, [["var ", FinalVarName, "=", mochijson2:encode(Value), ";\n"]|Accum]).
+    build_bindings(T, [["var ", FinalVarName, "=", json_encode(Value), ";\n"]|Accum]).
 
 build_arg_list([], Accum) ->
     lists:reverse(Accum);
 build_arg_list([H|[]], Accum) ->
-    build_arg_list([], [mochijson2:encode(H)|Accum]);
+    build_arg_list([], [json_encode(H)|Accum]);
 build_arg_list([H|T], Accum) ->
-    build_arg_list(T, [[mochijson2:encode(H), ","]|Accum]).
+    build_arg_list(T, [[json_encode(H), ","]|Accum]).
+
+json_encode(Term) when is_tuple(hd(Term)) ->
+    mochijson2:encode({struct, Term});
+json_encode(Term) ->
+    mochijson2:encode(Term).
