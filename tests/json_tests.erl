@@ -7,4 +7,4 @@ simple_test() ->
 
 nested_proplists_test() ->
     [?assertMatch(<<"{\"foo\":{\"bar\":1}}">>, list_to_binary(js_json:encode([{<<"foo">>, [{<<"bar">>, 1}]}]))),
-     ?assertMatch(<<"[123,\"abc\", {\"foo\":\"bar\"}]">>, list_to_binary(js_json:encode([123, <<"abc">>, [{<<"foo">>, <<"bar">>}]])))].
+     ?assertMatch(<<"[123,\"abc\",{\"foo\":\"bar\"}]">>, list_to_binary(js_json:encode([123, <<"abc">>, [{<<"foo">>, <<"bar">>}]])))].
