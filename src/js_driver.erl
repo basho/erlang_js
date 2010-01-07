@@ -32,7 +32,13 @@ new() ->
     end.
 
 new(no_json) ->
-    {ok, open_port({spawn, ?DRIVER_NAME}, [binary])}.
+    {ok, open_port({spawn, ?DRIVER_NAME}, [binary])};
+new(Initializer) when is_function(Initializer) ->
+    {ok, Port} = new(),
+    {ok, Initializer(Port)};
+new({InitMod, InitFun}) ->
+    {ok, Port} = new(),
+    {ok, InitMod:InitFun(Port)}.
 
 destroy(Ctx) ->
     port_close(Ctx).
