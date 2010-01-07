@@ -35,10 +35,20 @@ new(no_json) ->
     {ok, open_port({spawn, ?DRIVER_NAME}, [binary])};
 new(Initializer) when is_function(Initializer) ->
     {ok, Port} = new(),
-    {ok, Initializer(Port)};
+    case Initializer(Port) of
+        ok ->
+            {ok, Port};
+        _ ->
+            throw({error, init_failed})
+    end;
 new({InitMod, InitFun}) ->
     {ok, Port} = new(),
-    {ok, InitMod:InitFun(Port)}.
+    case InitMod:InitFun(Port) of
+        ok ->
+            {ok, Port};
+        _ ->
+            throw({error, init_failed})
+    end.
 
 destroy(Ctx) ->
     port_close(Ctx).
