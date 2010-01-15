@@ -9,7 +9,8 @@
 %% in Proceedings of the SIGPLAN '96 Conference on Programming Language
 %% Design and Implementation.
 
--module(mochinum).
+%% Renamed to js_mochinum to prevent codepath conflicts
+-module(js_mochinum).
 -author("Bob Ippolito <bob@mochimedia.com>").
 -export([digits/1, frexp/1, int_pow/2, int_ceil/1, test/0]).
 
