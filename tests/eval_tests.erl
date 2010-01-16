@@ -32,6 +32,11 @@ function_test_() ->
                ?assertMatch({ok, <<"abc">>}, js:call(P, <<"get_first">>, [Data])),
                erlang:unlink(P) end]}].
 
+json_test_() ->
+  [fun() ->
+       Struct = {struct, [{<<"test">>, <<"1">>}]},
+       ?assertMatch(Struct, js_mochijson2:decode(js_mochijson2:encode(Struct))) end].
+
 error_test_() ->
     [{setup, fun test_util:port_setup/0,
       fun test_util:port_teardown/1,
