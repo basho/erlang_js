@@ -28,7 +28,7 @@ function_test_() ->
        fun() ->
                P = test_util:get_thing(),
                ?assertMatch(ok, js:define(P, <<"function get_first(data) { return data[\"first\"]; };">>)),
-               Data = [{<<"first">>, <<"abc">>}],
+               Data = {struct, [{<<"first">>, <<"abc">>}]},
                ?assertMatch({ok, <<"abc">>}, js:call(P, <<"get_first">>, [Data])),
                erlang:unlink(P) end]}].
 
