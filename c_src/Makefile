@@ -16,9 +16,10 @@ libjs.a: libnspr4.a js/src/libjs.a
 	@cp deps/js/src/libjs.a .
 
 deps/nspr_release/dist/lib/libnspr4.a: deps/nsprpub deps/nspr_release
-	cd deps/nspr_release ;\
+	@echo "Building NSPR... this can take a bit"
+	@cd deps/nspr_release ; \
 	../nsprpub/configure --disable-debug --enable-optimize \
-		$(NSPR_SIXTYFOUR) ;\
+		$(NSPR_SIXTYFOUR) ; \
 	make
 
 deps:
@@ -32,8 +33,11 @@ deps/nspr_release: deps
 	@mkdir $(@)
 
 js/src/libjs.a: deps/js
-	patch -p1 < patches/deps-js-src-Makefile.ref.jscpucfg.patch
-	make -C deps/js/src BUILD_OPT=1 JS_DIST=../../nspr_release/dist \
+	@echo "Building Spidermonkey... this can take a bit"
+	@for I in patches/deps-js-*.patch; do \
+		patch -p1 < $${I}; \
+	done
+	@make -C deps/js/src BUILD_OPT=1 JS_DIST=../../nspr_release/dist \
 		JS_THREADSAFE=1 \
 		XCFLAGS="-DHAVE_VA_COPY -DVA_COPY=va_copy $(JS_SIXTYFOUR)" \
 		XLDFLAGS="$(JS_TOILET)" \
@@ -66,7 +70,7 @@ clean: jsclean
 
 nspryoink: deps
 	@cd deps ; \
-	cvs -q -d :pserver:anonymous@cvs-mirror.mozilla.org:/cvsroot \
+	@cvs -q -d :pserver:anonymous@cvs-mirror.mozilla.org:/cvsroot \
 		co -r NSPR_4_8_RTM -d nsprpub mozilla/nsprpub
 
 .EXPORT_ALL_VARIABLES:

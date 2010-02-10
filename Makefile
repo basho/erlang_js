@@ -1,4 +1,7 @@
 all:
+	./rebar compile
+
+verbose:
 	./rebar compile verbose=1
 
 clean:
