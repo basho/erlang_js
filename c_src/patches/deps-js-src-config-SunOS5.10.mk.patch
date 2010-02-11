@@ -10,7 +10,7 @@
 +MKSHLIB    = $(LD) -shared
 +OS_CFLAGS += -fPIC
 +CFLAGS    += -fPIC
-+ifneq (86,$(findstring 86,$(OS_TEST)))
++ifneq (86,$(findstring 86,$(OS_RELEASE)))
 +ASFLAGS   += -xarch=v9 -DULTRA_SPARC
 +DEFINES   += -DULTRA_SPARC
 +OS_CFLAGS += -Wa,-xarch=v9,-DULTRA_SPARC

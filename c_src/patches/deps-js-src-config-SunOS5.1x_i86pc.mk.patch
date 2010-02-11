@@ -1,6 +1,6 @@
 --- /dev/null	2010-02-11 06:02:12.000000000 -0800
 +++ c_src/deps/js/src/config/SunOS5.1x_i86pc.mk	2010-02-11 08:42:17.000000000 -0800
-@@ -0,0 +1,68 @@
+@@ -0,0 +1,69 @@
 +# -*- Mode: makefile -*-
 +#
 +# ***** BEGIN LICENSE BLOCK *****
@@ -48,6 +48,7 @@
 +CC = gcc
 +CCC = g++
 +CFLAGS +=  -Wall -Wno-format
++LD = gcc
 +
 +RANLIB = echo
 +
@@ -56,7 +57,7 @@
 +
 +GFX_ARCH = x
 +
-+OS_CFLAGS = -DXP_UNIX -DSVR4 -DSYSV -DSOLARIS -DHAVE_LOCALTIME_R
++OS_CFLAGS = -DXP_UNIX -DSVR4 -DSYSV -DSOLARIS -DHAVE_LOCALTIME_R -fPIC
 +OS_LIBS = -lsocket -lnsl -ldl
 +
 +ASFLAGS += -P -L -K PIC -D_ASM -D__STDC__=0
