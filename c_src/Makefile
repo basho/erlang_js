@@ -34,7 +34,8 @@ deps/nspr_release: deps
 
 js/src/libjs.a: deps/js
 	@echo "Building Spidermonkey... this can take a bit"
-	@for I in patches/deps-js-*.patch; do \
+	@export PATH=/opt/csw/gcc4/bin:/opt/csw/gnu:/opt/csw/bin:/usr/local/bin:/usr/bin ; \
+	for I in patches/deps-js-*.patch; do \
 		patch -p1 < $${I}; \
 	done
 	@make -C deps/js/src BUILD_OPT=1 JS_DIST=../../nspr_release/dist \
