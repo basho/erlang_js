@@ -1,6 +1,6 @@
 --- /dev/null	2010-02-11 06:02:12.000000000 -0800
-+++ c_src/deps/js/src/config/SunOS5.10_i86pc.mk	2010-02-11 07:44:41.000000000 -0800
-@@ -0,0 +1,60 @@
++++ c_src/deps/js/src/config/SunOS5.10_i86pc.mk	2010-02-11 08:45:15.000000000 -0800
+@@ -0,0 +1,48 @@
 +# -*- Mode: makefile -*-
 +#
 +# ***** BEGIN LICENSE BLOCK *****
@@ -41,23 +41,11 @@
 +# ***** END LICENSE BLOCK *****
 +
 +#
-+# Config stuff for SunOS5.10, using vendor gcc and NSPR
++# Config stuff for SunOS5.10_i86pc, using vendor gcc and NSPR
 +#
 +
-+include $(DEPTH)/config/SunOS5.5.mk
++include $(DEPTH)/config/SunOS5.1x_i86pc.mk
 +
 +INCLUDES += -I/usr/sfw/include/mozilla/nspr
 +OTHER_LIBS += -L/usr/sfw/lib/mozilla -R/usr/sfw/lib/mozilla
-+
-+CC         = gcc
-+LD         = gcc
-+MKSHLIB    = $(LD) -shared
-+OS_CFLAGS += -fPIC
-+CFLAGS    += -fPIC
-+ifneq (86,$(findstring 86,$(OS_TEST)))
-+ASFLAGS   += -xarch=v9 -DULTRA_SPARC
-+DEFINES   += -DULTRA_SPARC
-+OS_CFLAGS += -Wa,-xarch=v9,-DULTRA_SPARC
-+CFLAGS    += -DULTRA_SPARC
-+endif
 +
