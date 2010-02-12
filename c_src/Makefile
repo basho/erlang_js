@@ -35,7 +35,7 @@ deps/nspr_release: deps
 deps/js/src/libjs.a: deps/js
 	@echo "Building Spidermonkey... this can take a bit"
 	@for I in patches/deps-js-*.patch; do \
-		patch -p1 < $${I}; \
+		(patch -p1 < $${I} || echo "Skipping patch"); \
 	done
 	@make -C deps/js/src BUILD_OPT=1 JS_DIST=../../nspr_release/dist \
 		JS_THREADSAFE=1 \
@@ -49,7 +49,7 @@ deps/js/src/libjs.a: deps/js
 	@cp deps/js/src/*_OPT.OBJ/*.h include/js
 
 deps/js: deps
-	@mkdir $(@)
+	@mkdir -p $(@)
 	@tar -C deps -xzf js-$(SMONKEY_VER).tar.gz
 
 clean:
