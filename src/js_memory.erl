@@ -15,7 +15,7 @@
 
 -module(js_memory).
 
--define(COUNT, 1000000).
+-define(COUNT, 100000).
 
 -export([stress/1]).
 
