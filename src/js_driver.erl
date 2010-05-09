@@ -20,7 +20,9 @@
 
 -module(js_driver).
 
--export([load_driver/0, new/0, new/1, destroy/1, shutdown/1]).
+-define(DEFAULT_HEAP_SIZE, 8).
+
+-export([load_driver/0, new/0, new/1, new/2, destroy/1, shutdown/1]).
 -export([define_js/2, define_js/3, define_js/4, eval_js/2, eval_js/3]).
 
 -define(SCRIPT_TIMEOUT, 5000).
@@ -45,9 +47,16 @@ load_driver() ->
 
 %% @spec new() -> {ok, port()} | {error, atom()} | {error, any()}
 %% @doc Create a new Javascript VM instance and preload Douglas Crockford's
-%% json2 converter (http://www.json.org/js.html)
+%% json2 converter (http://www.json.org/js.html). Uses a default heap
+%% size of 8MB.
 new() ->
-    {ok, Port} = new(no_json),
+    new(?DEFAULT_HEAP_SIZE).
+
+%% @spec new(HeapSize::int()) -> {ok, port()} | {error, atom()} | {error, any()}
+%% @doc Create a new Javascript VM instance and preload Douglas Crockford's
+%% json2 converter (http://www.json.org/js.html)
+new(HeapSize) ->
+    {ok, Port} = new(HeapSize, no_json),
     %% Load json converter for use later
     case define_js(Port, <<"json2.js">>, json_converter(), ?SCRIPT_TIMEOUT) of
         ok ->
@@ -61,10 +70,12 @@ new() ->
 %% @spec new(no_json | init_fun() | {ModName::atom(), FunName::atom()}) -> {ok, port()} | {error, atom()} | {error, any()}
 %% @doc Create a new Javascript VM instance. The function arguments control how the VM instance is initialized.
 %% User supplied initializers must return true or false.
-new(no_json) ->
-    {ok, open_port({spawn, ?DRIVER_NAME}, [binary])};
-new(Initializer) when is_function(Initializer) ->
-    {ok, Port} = new(),
+new(HeapSize, no_json) ->
+    Port = open_port({spawn, ?DRIVER_NAME}, [binary]),
+    call_driver(Port, "ij", [HeapSize], 5000),
+    {ok, Port};
+new(HeapSize, Initializer) when is_function(Initializer) ->
+    {ok, Port} = new(HeapSize),
     case Initializer(Port) of
         ok ->
             {ok, Port};
@@ -73,8 +84,8 @@ new(Initializer) when is_function(Initializer) ->
             error_logger:error_report(Error),
             throw({error, init_failed})
     end;
-new({InitMod, InitFun}) ->
-    {ok, Port} = new(),
+new(HeapSize, {InitMod, InitFun}) ->
+    {ok, Port} = new(HeapSize),
     case InitMod:InitFun(Port) of
         ok ->
             {ok, Port};

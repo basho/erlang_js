@@ -107,10 +107,10 @@ JSBool js_log(JSContext *cx, uintN argc, jsval *vp) {
   return JSVAL_TRUE;
 }
 
-spidermonkey_vm *sm_initialize() {
+spidermonkey_vm *sm_initialize(long heap_size) {
   spidermonkey_vm *vm = (spidermonkey_vm*) driver_alloc(sizeof(spidermonkey_vm));
   vm->runtime = JS_NewRuntime(MAX_GC_SIZE);
-  JS_SetGCParameter(vm->runtime, JSGC_MAX_BYTES, CONTEXT_HEAP_SIZE);
+  JS_SetGCParameter(vm->runtime, JSGC_MAX_BYTES, heap_size);
   JS_SetGCParameter(vm->runtime, JSGC_MAX_MALLOC_BYTES, LAST_DITCH_GC_THRESHOLD);
   vm->context = JS_NewContext(vm->runtime, CONTEXT_THREAD_STACK_SIZE);
   begin_request(vm);

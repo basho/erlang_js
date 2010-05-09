@@ -1,9 +1,12 @@
 -module(test_util).
 
--export([port_setup/0, port_teardown/1, null_teardown/1, get_thing/0]).
+-export([port_setup/0, port_setup/1, port_teardown/1, null_teardown/1, get_thing/0]).
 
 port_setup() ->
-  {ok, P} = js_driver:new(),
+    port_setup(8).
+
+port_setup(Size) ->
+  {ok, P} = js_driver:new(Size),
   start_thing_holder(P),
   P.
 

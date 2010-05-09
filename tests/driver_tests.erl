@@ -10,6 +10,14 @@ load_test_() ->
          ?assert(is_port(P)),
          erlang:unlink(P) end]}].
 
+big_heap_test_() ->
+    [{setup, fun() -> test_util:port_setup(64) end,
+      fun test_util:port_teardown/1,
+      [fun() ->
+               P = test_util:get_thing(),
+               ?assert(is_port(P)),
+               erlang:unlink(P) end]}].
+
 destroy_test_() ->
   [{setup, fun test_util:port_setup/0,
     fun test_util:null_teardown/1,

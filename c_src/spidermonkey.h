@@ -42,7 +42,7 @@ typedef struct _spidermonkey_vm_t {
 /* 8MB last ditch GC threshold */
 #define LAST_DITCH_GC_THRESHOLD CONTEXT_HEAP_SIZE
 
-spidermonkey_vm *sm_initialize();
+spidermonkey_vm *sm_initialize(long heap_size);
 
 void sm_stop(spidermonkey_vm *vm);
 

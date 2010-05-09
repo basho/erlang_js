@@ -161,7 +161,6 @@ static ErlDrvData start(ErlDrvPort port, char *cmd) {
   retval->atom_ok = driver_mk_atom((char *) "ok");
   retval->atom_error = driver_mk_atom((char *) "error");
   retval->atom_unknown_cmd = driver_mk_atom((char *) "unknown_command");
-  retval->vm = sm_initialize();
   return (ErlDrvData) retval;
 }
 
@@ -176,11 +175,23 @@ static void stop(ErlDrvData handle) {
 
 static void process(ErlDrvData handle, ErlIOVec *ev) {
   spidermonkey_drv_t *dd = (spidermonkey_drv_t *) handle;
-  js_call *call_data = (js_call *) driver_alloc(sizeof(js_call));
-  call_data->driver_data = dd;
-  call_data->args = ev->binv[1];
-  driver_binary_inc_refc(call_data->args);
-  ErlDrvPort port = dd->port;
-  unsigned long thread_key = (unsigned long) port;
-  driver_async(dd->port, (unsigned int *) &thread_key, (asyncfun) run_js, (void *) call_data, NULL);
+  char *data = ev->binv[1]->orig_bytes;
+  char *command = read_command(&data);
+  if (strncmp(command, "ij", 2) == 0) {
+    char *call_id = read_string(&data);
+    int heap_size = read_int32(&data);
+    dd->vm = sm_initialize(heap_size * 1024 * 1024);
+    send_ok_response(dd, call_id);
+    driver_free(call_id);
+    driver_free(command);
+  }
+  else {
+    js_call *call_data = (js_call *) driver_alloc(sizeof(js_call));
+    call_data->driver_data = dd;
+    call_data->args = ev->binv[1];
+    driver_binary_inc_refc(call_data->args);
+    ErlDrvPort port = dd->port;
+    unsigned long thread_key = (unsigned long) port;
+    driver_async(dd->port, (unsigned int *) &thread_key, (asyncfun) run_js, (void *) call_data, NULL);
+  }
 }

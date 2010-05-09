@@ -22,7 +22,7 @@ function_test_() ->
                erlang:unlink(P) end,
        fun() ->
                P = test_util:get_thing(),
-               ?assertMatch(ok, js:define(P, <<"var f = function(x, y) { return y - x; };">>)),
+               ?assertMatch(ok, js:define(P, <<"var f = function(x, y) \n{ return y - x; \n};">>)),
                ?assertMatch({ok, 75}, js:call(P, <<"f">>, [10, 85])),
                erlang:unlink(P) end,
        fun() ->
