@@ -39,11 +39,12 @@ typedef void (*asyncfun)(void *);
 
 /* Forward declarations */
 static ErlDrvData start(ErlDrvPort port, char *cmd);
+static int init();
 static void stop(ErlDrvData handle);
 static void process(ErlDrvData handle, ErlIOVec *ev);
 
 static ErlDrvEntry spidermonkey_drv_entry = {
-    NULL,                             /* init */
+    init,                             /* init */
     start,                            /* startup */
     stop,                             /* shutdown */
     NULL,                             /* output */
@@ -152,6 +153,11 @@ void run_js(void *jsargs) {
 
 DRIVER_INIT(spidermonkey_drv) {
   return &spidermonkey_drv_entry;
+}
+
+static int init() {
+  sm_configure_locale();
+  return 0;
 }
 
 static ErlDrvData start(ErlDrvPort port, char *cmd) {

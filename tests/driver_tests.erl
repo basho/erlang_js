@@ -26,3 +26,9 @@ destroy_test_() ->
          ?assertMatch(true, js_driver:destroy(P)),
          ?assertError(badarg, js:define(P, <<"var x = 100;">>)),
          erlang:unlink(P) end]}].
+
+spinup_test_() ->
+  [fun() ->
+       F = fun({ok, P}) -> js_driver:destroy(P) end,
+       Ports = [js_driver:new() || X <- lists:seq(1, 16)],
+       [F(P) || P <- Ports] end].

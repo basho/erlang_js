@@ -48,6 +48,17 @@ binding_test_() ->
                ?assertMatch({ok, 3}, js:call(P, <<"constant_div">>, [9], [{<<"q">>, 3}])),
                erlang:unlink(P) end]}].
 
+charset_test_() ->
+    [{setup, fun test_util:port_setup/0,
+      fun test_util:port_teardown/1,
+      [fun() ->
+           P = test_util:get_thing(),
+           %% Kanji character
+           Kanji = <<123,34,116,101,120,116,34,58,34,228,188,141,34,125,10>>,
+           ?assertMatch(ok, js:define(P, <<"function foo(x) { return x; }">>)),
+           ?assertMatch({ok, Kanji}, js:call(P, <<"foo">>, [Kanji])),
+           erlang:unlink(P) end]}].
+
 json_test_() ->
   [fun() ->
        Struct = {struct, [{<<"test">>, <<"1">>}]},

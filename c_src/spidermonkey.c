@@ -107,6 +107,10 @@ JSBool js_log(JSContext *cx, uintN argc, jsval *vp) {
   return JSVAL_TRUE;
 }
 
+void sm_configure_locale() {
+  JS_SetCStringsAreUTF8();
+}
+
 spidermonkey_vm *sm_initialize(long heap_size) {
   spidermonkey_vm *vm = (spidermonkey_vm*) driver_alloc(sizeof(spidermonkey_vm));
   vm->runtime = JS_NewRuntime(MAX_GC_SIZE);
