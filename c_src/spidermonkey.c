@@ -111,12 +111,13 @@ void sm_configure_locale() {
   JS_SetCStringsAreUTF8();
 }
 
-spidermonkey_vm *sm_initialize(long heap_size) {
+spidermonkey_vm *sm_initialize(long thread_stack, long heap_size) {
   spidermonkey_vm *vm = (spidermonkey_vm*) driver_alloc(sizeof(spidermonkey_vm));
   vm->runtime = JS_NewRuntime(MAX_GC_SIZE);
   JS_SetGCParameter(vm->runtime, JSGC_MAX_BYTES, heap_size);
-  JS_SetGCParameter(vm->runtime, JSGC_MAX_MALLOC_BYTES, LAST_DITCH_GC_THRESHOLD);
-  vm->context = JS_NewContext(vm->runtime, CONTEXT_THREAD_STACK_SIZE);
+  int gc_size = (int) heap_size * 0.25;
+  JS_SetGCParameter(vm->runtime, JSGC_MAX_MALLOC_BYTES, gc_size);
+  vm->context = JS_NewContext(vm->runtime, thread_stack);
   begin_request(vm);
   JS_SetOptions(vm->context, JSOPTION_VAROBJFIX);
   JS_SetOptions(vm->context, JSOPTION_STRICT);

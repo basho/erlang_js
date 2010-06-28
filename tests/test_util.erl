@@ -6,7 +6,7 @@ port_setup() ->
     port_setup(8).
 
 port_setup(Size) ->
-  {ok, P} = js_driver:new(Size),
+  {ok, P} = js_driver:new(8, Size),
   start_thing_holder(P),
   P.
 

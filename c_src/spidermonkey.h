@@ -31,20 +31,11 @@ typedef struct _spidermonkey_vm_t {
 } spidermonkey_vm;
 
 /* Bytes to allocate before GC */
-#define MAX_GC_SIZE 1024 * 1024
-
-/* 8K stack size for each context */
-#define CONTEXT_THREAD_STACK_SIZE 8192
-
-/* 8MB heap for each context */
-#define CONTEXT_HEAP_SIZE 8 * 1024 * 1024
-
-/* 8MB last ditch GC threshold */
-#define LAST_DITCH_GC_THRESHOLD CONTEXT_HEAP_SIZE
+#define MAX_GC_SIZE 16 * 1024
 
 void sm_configure_locale();
 
-spidermonkey_vm *sm_initialize(long heap_size);
+spidermonkey_vm *sm_initialize(long thread_stack, long heap_size);
 
 void sm_stop(spidermonkey_vm *vm);
 
