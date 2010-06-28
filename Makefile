@@ -7,7 +7,7 @@ verbose:
 clean:
 	rm -rf tests_ebin docs
 	./rebar clean
-	cd c_src;make clean
+	cd c_src; $(MAKE) clean
 
 test: all
 	@mkdir -p tests_ebin

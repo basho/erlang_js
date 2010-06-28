@@ -1,6 +1,8 @@
 # This Makefile builds the dependencies (libjs and libnspr) needed by
 # spidermonkey_drv.so
 
+TAR		?= tar
+GUNZIP		?= gunzip
 SMONKEY_VER	:= 1.8.0-rc1
 NSPR_VER	:= 4.8
 
@@ -16,7 +18,7 @@ NSPR_DIR   := $(CURDIR)/nsprpub
 js: $(LIB_DIR)/libjs.a
 
 $(LIB_DIR)/libjs.a: $(LIB_DIR)/libnspr4.a
-	tar -xzf js-$(SMONKEY_VER).tar.gz
+	$(GUNZIP) -c js-$(SMONKEY_VER).tar.gz | $(TAR) xf -
 	@for I in patches/js-*.patch; do \
 		(patch -p1 < $${I} || echo "Skipping patch"); \
 	done
@@ -32,7 +34,7 @@ $(LIB_DIR)/libjs.a: $(LIB_DIR)/libnspr4.a
 	@cp $(JS_DIR)/src/*_OPT.OBJ/libjs.a $(LIB_DIR)
 
 $(LIB_DIR)/libnspr4.a:
-	tar -xzf nsprpub-$(NSPR_VER).tar.gz
+	$(GUNZIP) -c nsprpub-$(NSPR_VER).tar.gz | $(TAR) xf -
 	(cd $(NSPR_DIR) && \
 	 ./configure --disable-debug --enable-optimize \
                      --prefix=$(SYSTEM_DIR) $(NSPR_SIXTYFOUR) && \
