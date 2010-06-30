@@ -21,7 +21,7 @@
 -module(js_driver).
 
 -define(DEFAULT_HEAP_SIZE, 8). %% MB
--define(DEFAULT_THREAD_STACK, 8). %% KB
+-define(DEFAULT_THREAD_STACK, 16). %% MB
 
 -export([load_driver/0, new/0, new/2, new/3, destroy/1, shutdown/1]).
 -export([define_js/2, define_js/3, define_js/4, eval_js/2, eval_js/3]).

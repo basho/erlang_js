@@ -113,11 +113,12 @@ void sm_configure_locale() {
 
 spidermonkey_vm *sm_initialize(long thread_stack, long heap_size) {
   spidermonkey_vm *vm = (spidermonkey_vm*) driver_alloc(sizeof(spidermonkey_vm));
+  int gc_size = (int) heap_size * 0.25;
   vm->runtime = JS_NewRuntime(MAX_GC_SIZE);
   JS_SetGCParameter(vm->runtime, JSGC_MAX_BYTES, heap_size);
-  int gc_size = (int) heap_size * 0.25;
   JS_SetGCParameter(vm->runtime, JSGC_MAX_MALLOC_BYTES, gc_size);
-  vm->context = JS_NewContext(vm->runtime, thread_stack);
+  vm->context = JS_NewContext(vm->runtime, 8192);
+  JS_SetScriptStackQuota(vm->context, thread_stack);
   begin_request(vm);
   JS_SetOptions(vm->context, JSOPTION_VAROBJFIX);
   JS_SetOptions(vm->context, JSOPTION_STRICT);

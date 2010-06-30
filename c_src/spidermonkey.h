@@ -31,7 +31,7 @@ typedef struct _spidermonkey_vm_t {
 } spidermonkey_vm;
 
 /* Bytes to allocate before GC */
-#define MAX_GC_SIZE 16 * 1024
+#define MAX_GC_SIZE 1024 * 1024
 
 void sm_configure_locale();
 

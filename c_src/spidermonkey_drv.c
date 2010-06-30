@@ -185,8 +185,12 @@ static void process(ErlDrvData handle, ErlIOVec *ev) {
   char *command = read_command(&data);
   if (strncmp(command, "ij", 2) == 0) {
     char *call_id = read_string(&data);
-    int thread_stack = read_int32(&data) * 1024;
-    int heap_size = read_int32(&data) * 1024 * 1024;
+    int thread_stack = read_int32(&data);
+    if (thread_stack < 8) {
+      thread_stack = 8;
+    }
+    thread_stack = thread_stack * (1024 * 1024);
+    int heap_size = read_int32(&data) * (1024 * 1024);
     dd->vm = sm_initialize(thread_stack, heap_size);
     send_ok_response(dd, call_id);
     driver_free(call_id);
