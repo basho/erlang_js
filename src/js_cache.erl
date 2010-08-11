@@ -50,7 +50,7 @@ delete(Key) ->
 %% @doc Retrieves a key/value pair from the cache. If the key
 %% is not in the cache, the atom 'not_found' is returned.
 fetch(Key) ->
-    gen_server:call(?SERVER, {fetch, Key}).
+    gen_server:call(?SERVER, {fetch, Key}, infinity).
 
 init([]) ->
     {ok, #state{}}.
