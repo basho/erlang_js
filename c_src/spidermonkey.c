@@ -131,6 +131,7 @@ spidermonkey_vm *sm_initialize(long thread_stack, long heap_size) {
   JS_DefineFunction(vm->context, JS_GetGlobalObject(vm->context), "ejsLog", funptr,
 		    0, JSFUN_FAST_NATIVE);
   end_request(vm);
+  vm->invoke_count = 0;
   return vm;
 }
 
@@ -212,6 +213,7 @@ char *sm_eval(spidermonkey_vm *vm, const char *filename, const char *code, int h
   if (error == NULL) {
     JS_ClearPendingException(vm->context);
     JS_ExecuteScript(vm->context, vm->global, script, &result);
+    vm->invoke_count++;
     error = (spidermonkey_error *) JS_GetContextPrivate(vm->context);
     if (error == NULL) {
       if (handle_retval) {
@@ -239,7 +241,14 @@ char *sm_eval(spidermonkey_vm *vm, const char *filename, const char *code, int h
     free_error(error);
     JS_SetContextPrivate(vm->context, NULL);
   }
-  JS_MaybeGC(vm->context);
+  if (vm->invoke_count > 200) {
+    JS_GC(vm->context);
+    vm->invoke_count = 0;
+  }
+  else {
+    JS_MaybeGC(vm->context);
+  }
+
   end_request(vm);
   return retval;
 }

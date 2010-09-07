@@ -28,6 +28,7 @@ typedef struct _spidermonkey_vm_t {
   JSRuntime* runtime;
   JSContext* context;
   JSObject* global;
+  int invoke_count;
 } spidermonkey_vm;
 
 /* Bytes to allocate before GC */

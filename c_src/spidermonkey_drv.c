@@ -194,7 +194,6 @@ static void process(ErlDrvData handle, ErlIOVec *ev) {
     dd->vm = sm_initialize(thread_stack, heap_size);
     send_ok_response(dd, call_id);
     driver_free(call_id);
-    driver_free(command);
   }
   else {
     js_call *call_data = (js_call *) driver_alloc(sizeof(js_call));
@@ -205,4 +204,5 @@ static void process(ErlDrvData handle, ErlIOVec *ev) {
     unsigned long thread_key = (unsigned long) port;
     driver_async(dd->port, (unsigned int *) &thread_key, (asyncfun) run_js, (void *) call_data, NULL);
   }
+  driver_free(command);
 }
