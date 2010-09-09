@@ -24,11 +24,15 @@ typedef struct _spidermonkey_error_t {
   char *offending_source;
 } spidermonkey_error;
 
+typedef struct _spidermonkey_state_t {
+  int branch_count;
+  spidermonkey_error *error;
+} spidermonkey_state;
+
 typedef struct _spidermonkey_vm_t {
   JSRuntime* runtime;
   JSContext* context;
   JSObject* global;
-  int invoke_count;
 } spidermonkey_vm;
 
 /* Bytes to allocate before GC */

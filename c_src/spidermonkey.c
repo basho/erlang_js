@@ -20,6 +20,8 @@
 
 #include "spidermonkey.h"
 
+void free_error(spidermonkey_state *state);
+
 /* The class of the global object. */
 static JSClass global_class = {
     "global", JSCLASS_GLOBAL_FLAGS,
@@ -67,8 +69,23 @@ void on_error(JSContext *context, const char *message, JSErrorReport *report) {
     else {
       sm_error->offending_source = copy_string("unknown");
     }
-    JS_SetContextPrivate(context, sm_error);
+    spidermonkey_state *state = (spidermonkey_state *) JS_GetContextPrivate(context);
+    state->error = sm_error;
+    JS_SetContextPrivate(context, state);
   }
+}
+
+JSBool on_branch(JSContext *context, JSScript *script) {
+  spidermonkey_state *state = (spidermonkey_state *) JS_GetContextPrivate(context);
+  state->branch_count++;
+  if (state->branch_count == 550) {
+    JS_GC(context);
+    state->branch_count = 0;
+  }
+  else if(state->branch_count % 100 == 0) {
+    JS_MaybeGC(context);
+  }
+  return JS_TRUE;
 }
 
 void write_timestamp(FILE *fd) {
@@ -113,12 +130,16 @@ void sm_configure_locale() {
 
 spidermonkey_vm *sm_initialize(long thread_stack, long heap_size) {
   spidermonkey_vm *vm = (spidermonkey_vm*) driver_alloc(sizeof(spidermonkey_vm));
+  spidermonkey_state *state = (spidermonkey_state *) driver_alloc(sizeof(spidermonkey_state));
+  state->branch_count = 0;
+  state->error = NULL;
   int gc_size = (int) heap_size * 0.25;
   vm->runtime = JS_NewRuntime(MAX_GC_SIZE);
   JS_SetGCParameter(vm->runtime, JSGC_MAX_BYTES, heap_size);
   JS_SetGCParameter(vm->runtime, JSGC_MAX_MALLOC_BYTES, gc_size);
   vm->context = JS_NewContext(vm->runtime, 8192);
   JS_SetScriptStackQuota(vm->context, thread_stack);
+
   begin_request(vm);
   JS_SetOptions(vm->context, JSOPTION_VAROBJFIX);
   JS_SetOptions(vm->context, JSOPTION_STRICT);
@@ -127,16 +148,24 @@ spidermonkey_vm *sm_initialize(long thread_stack, long heap_size) {
   vm->global = JS_NewObject(vm->context, &global_class, NULL, NULL);
   JS_InitStandardClasses(vm->context, vm->global);
   JS_SetErrorReporter(vm->context, on_error);
+  JS_SetBranchCallback(vm->context, on_branch);
+  JS_SetContextPrivate(vm->context, state);
   JSNative *funptr = (JSNative *) *js_log;
   JS_DefineFunction(vm->context, JS_GetGlobalObject(vm->context), "ejsLog", funptr,
 		    0, JSFUN_FAST_NATIVE);
   end_request(vm);
-  vm->invoke_count = 0;
+
   return vm;
 }
 
 void sm_stop(spidermonkey_vm *vm) {
   JS_SetContextThread(vm->context);
+  spidermonkey_state *state = (spidermonkey_state *) JS_GetContextPrivate(vm->context);
+  if (state->error != NULL) {
+    free_error(state);
+  }
+  driver_free(state);
+  JS_SetContextPrivate(vm->context, NULL);
   JS_DestroyContext(vm->context);
   JS_DestroyRuntime(vm->runtime);
   driver_free(vm);
@@ -193,10 +222,11 @@ char *error_to_json(const spidermonkey_error *error) {
   return retval;
 }
 
-void free_error(spidermonkey_error *error) {
-  driver_free(error->offending_source);
-  driver_free(error->msg);
-  driver_free(error);
+void free_error(spidermonkey_state *state) {
+  driver_free(state->error->offending_source);
+  driver_free(state->error->msg);
+  driver_free(state->error);
+  state->error = NULL;
 }
 
 char *sm_eval(spidermonkey_vm *vm, const char *filename, const char *code, int handle_retval) {
@@ -209,13 +239,12 @@ char *sm_eval(spidermonkey_vm *vm, const char *filename, const char *code, int h
 			    vm->global,
 			    code, strlen(code),
 			    filename, 1);
-  spidermonkey_error *error = (spidermonkey_error *) JS_GetContextPrivate(vm->context);
-  if (error == NULL) {
+  spidermonkey_state *state = (spidermonkey_state *) JS_GetContextPrivate(vm->context);
+  if (state->error == NULL) {
     JS_ClearPendingException(vm->context);
     JS_ExecuteScript(vm->context, vm->global, script, &result);
-    vm->invoke_count++;
-    error = (spidermonkey_error *) JS_GetContextPrivate(vm->context);
-    if (error == NULL) {
+    state = (spidermonkey_state *) JS_GetContextPrivate(vm->context);
+    if (state->error == NULL) {
       if (handle_retval) {
 	if (JSVAL_IS_STRING(result)) {
 	  JSString *str = JS_ValueToString(vm->context, result);
@@ -231,24 +260,16 @@ char *sm_eval(spidermonkey_vm *vm, const char *filename, const char *code, int h
       JS_DestroyScript(vm->context, script);
     }
     else {
-      retval = error_to_json(error);
-      free_error(error);
-      JS_SetContextPrivate(vm->context, NULL);
+      retval = error_to_json(state->error);
+      free_error(state);
+      JS_SetContextPrivate(vm->context, state);
     }
   }
   else {
-    retval = error_to_json(error);
-    free_error(error);
-    JS_SetContextPrivate(vm->context, NULL);
+    retval = error_to_json(state->error);
+    free_error(state);
+    JS_SetContextPrivate(vm->context, state);
   }
-  if (vm->invoke_count > 200) {
-    JS_GC(vm->context);
-    vm->invoke_count = 0;
-  }
-  else {
-    JS_MaybeGC(vm->context);
-  }
-
   end_request(vm);
   return retval;
 }
