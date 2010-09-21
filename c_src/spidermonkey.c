@@ -161,10 +161,12 @@ spidermonkey_vm *sm_initialize(long thread_stack, long heap_size) {
 void sm_stop(spidermonkey_vm *vm) {
   JS_SetContextThread(vm->context);
   spidermonkey_state *state = (spidermonkey_state *) JS_GetContextPrivate(vm->context);
-  if (state->error != NULL) {
-    free_error(state);
+  if (state != NULL) {
+    if (state->error != NULL) {
+      free_error(state);
+    }
+    driver_free(state);
   }
-  driver_free(state);
   JS_SetContextPrivate(vm->context, NULL);
   JS_DestroyContext(vm->context);
   JS_DestroyRuntime(vm->runtime);

@@ -172,7 +172,9 @@ static ErlDrvData start(ErlDrvPort port, char *cmd) {
 
 static void stop(ErlDrvData handle) {
   spidermonkey_drv_t *dd = (spidermonkey_drv_t*) handle;
-  sm_stop(dd->vm);
+  if(dd->vm != NULL) {
+    sm_stop(dd->vm);
+  }
   if (dd->shutdown) {
     sm_shutdown();
   }
