@@ -2,25 +2,20 @@
 # instead of this file. This provides compatability on systems where GNU make is
 # not the system 'make' (eg. most non-linux UNIXes).
 
+REBAR ?= $(shell which rebar 2>/dev/null || which ./rebar)
+
 all:
-	@gmake all
+	$(REBAR) compile
 
 verbose:
-	@gmake verbose
+	$(REBAR) compile verbose=1
 
-test:
-	@gmake test
+check: test
+test: all
+	$(REBAR) eunit
 
 docs:
-	@gmake docs
-
-c_src: FORCE
-	@gmake c_src
-
-FORCE:
-
-c_src_clean:
-	@gmake c_src_clean
+	$(REBAR) doc
 
 clean:
-	@gmake clean
+	$(REBAR) clean
