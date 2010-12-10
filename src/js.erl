@@ -40,7 +40,7 @@ define(Ctx, Js, Bindings) ->
 %% @spec eval(port(), binary()) -> {ok, any()} | {error, any()}
 %% @doc Evaluate one or more Javascript expressions and return the results
 eval(Ctx, Js) ->
-    js_driver:eval_js(Ctx, Js).
+    js_driver:eval_js(Ctx, Js, 30000).
 
 %% @spec call(port(), binary(), list(any())) -> {ok, Result} | {error, any()}
 %% @doc Call a function by name with a list of arguments. This is roughly the
@@ -57,7 +57,7 @@ call(Ctx, FunctionName, Args, Bindings) ->
     Js = iolist_to_binary([<<"function() {">>, JsBindings, <<" if (">>, FunctionName, <<" === undefined) { throw(\"">>,
                            FunctionName, <<" not defined\"); } ">>,
                            <<"return ">>, FunctionName, <<"(">>, ArgList, <<");">>, <<"}();">>]),
-    js_driver:eval_js(Ctx, Js).
+    js_driver:eval_js(Ctx, Js, 30000).
 
 %% Internal functions
 build_bindings([], Accum) ->
