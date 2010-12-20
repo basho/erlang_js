@@ -3,6 +3,5 @@
 -include_lib("eunit/include/eunit.hrl").
 
 all_test_() ->
-    [{module, driver_tests},
-     {module, eval_tests},
-     {module, memory_tests}].
+  [{module, driver_tests},
+   {module, eval_tests}].

@@ -26,8 +26,6 @@ marshal_data(Term, Acc) when is_integer(Term) ->
     [<<Term:32>>|Acc];
 marshal_data(Term, Acc) when is_list(Term) ->
     marshal_data(list_to_binary(Term), Acc);
-marshal_data(Term, Acc) when is_atom(Term) ->
-    marshal_data(list_to_binary(atom_to_list(Term)), Acc);
 marshal_data(Term, Acc) when is_binary(Term) ->
     S = size(Term),
     [[<<S:32>>, Term]|Acc].

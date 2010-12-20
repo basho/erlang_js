@@ -68,7 +68,7 @@ new(ThreadStackSize, HeapSize) ->
     end.
 
 %% @type init_fun() = function(port()).
-%% @spec new(int(), int(), no_json | init_fun() | {ModName::atom(), FunName::atom()}) -> {ok, port()} | {error, atom()} | {error, any()}
+%% @spec new(no_json | init_fun() | {ModName::atom(), FunName::atom()}) -> {ok, port()} | {error, atom()} | {error, any()}
 %% @doc Create a new Javascript VM instance. The function arguments control how the VM instance is initialized.
 %% User supplied initializers must return true or false.
 new(ThreadStackSize, HeapSize, no_json) ->

@@ -3,7 +3,7 @@
 
 TAR		?= tar
 GUNZIP		?= gunzip
-SMONKEY_VER	:= 1.8.0-rc1
+#SMONKEY_VER	:= 1.8.0-rc1
 NSPR_VER	:= 4.8
 
 SYSTEM_DIR := $(CURDIR)/system
@@ -15,23 +15,19 @@ NSPR_DIR   := $(CURDIR)/nsprpub
 
 # NSPR_SIXTYFOUR is defined in erlang_js/rebar.config
 
-js: $(LIB_DIR)/libjs.a
+js: $(LIB_DIR)/libjs_static.a
 
-$(LIB_DIR)/libjs.a: $(LIB_DIR)/libnspr4.a
-	$(GUNZIP) -c js-$(SMONKEY_VER).tar.gz | $(TAR) xf -
-	@for I in patches/js-*.patch; do \
-		(patch -p1 < $${I} || echo "Skipping patch"); \
-	done
-	@$(MAKE) -C $(JS_DIR)/src BUILD_OPT=1 JS_DIST=$(SYSTEM_DIR) \
-		JS_THREADSAFE=1 \
-		XCFLAGS="-DHAVE_VA_COPY -DVA_COPY=va_copy $(CFLAGS)" \
-		XLDFLAGS="$(LDFLAGS)" \
-		-f Makefile.ref
+$(LIB_DIR)/libjs_static.a: $(LIB_DIR)/libnspr4.a
+	$(GUNZIP) -c jaegermonkey.tar.gz | $(TAR) xf -
+	@cd $(JS_DIR)/src;ac_cv_visibility_pragma=no ./configure --enable-threadsafe --enable-static \
+                                      --disable-tests --with-nspr-cflags="-I$(INC_DIR)/nspr" \
+                                      --with-nspr-libs="$(LIB_DIR)/libnspr4.a"
+	@$(MAKE) -C $(JS_DIR)/src
 	@mkdir $(INC_DIR)/js
 	@cp $(JS_DIR)/src/*.h $(INC_DIR)/js
 	@cp $(JS_DIR)/src/*.tbl $(INC_DIR)/js
-	@cp $(JS_DIR)/src/*_OPT.OBJ/*.h $(INC_DIR)/js
-	@cp $(JS_DIR)/src/*_OPT.OBJ/libjs.a $(LIB_DIR)
+	@cp $(JS_DIR)/src/libjs_static.a $(LIB_DIR)
+	@rm -rf $(JS_DIR)/src/dist
 
 $(LIB_DIR)/libnspr4.a:
 	$(GUNZIP) -c nsprpub-$(NSPR_VER).tar.gz | $(TAR) xf -

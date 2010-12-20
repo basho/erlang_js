@@ -94,6 +94,19 @@ error_test_() ->
                ?assert(verify_error(ErrorDesc)),
                erlang:unlink(P) end]}].
 
+native_test_() ->
+    [{setup, fun test_util:port_setup/0,
+      fun test_util:port_teardown/1,
+      [fun() ->
+               P = test_util:get_thing(),
+               file:delete("/tmp/foo.txt"),
+               js:define(P, <<"function log_it(x) { ejsLog('/tmp/foo.txt', 'Testing ' + x); }">>),
+               js:call(P, <<"log_it">>, [<<"123">>]),
+               {ok, C} = file:read_file("/tmp/foo.txt"),
+               ?assert(string:str(binary_to_list(C), "Testing 123") > 0),
+               file:delete("/tmp/foo.txt"),
+               erlang:unlink(P) end]}].
+
 
 %% Internal functions
 verify_error([{<<"lineno">>, LineNo},
