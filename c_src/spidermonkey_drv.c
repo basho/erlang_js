@@ -115,7 +115,10 @@ void run_js(void *jsargs) {
     char *filename = read_string(&data);
     char *code = read_string(&data);
     result = sm_eval(dd->vm, filename, code, 1);
-    if (strstr(result, "{\"error\"") != NULL) {
+    if (strstr(result, "\"data\":{\"error\":\"notfound\"") != NULL) {
+      send_error_string_response(dd, call_id, "{\"error\":\"map_reduce_error\"}");
+    }
+    else if (strstr(result, "{\"error\"") != NULL) {
       send_error_string_response(dd, call_id, result);
     }
     else {
