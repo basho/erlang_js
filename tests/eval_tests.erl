@@ -30,7 +30,15 @@ function_test_() ->
                ?assertMatch(ok, js:define(P, <<"function get_first(data) { return data[\"first\"]; };">>)),
                Data = {struct, [{<<"first">>, <<"abc">>}]},
                ?assertMatch({ok, <<"abc">>}, js:call(P, <<"get_first">>, [Data])),
-               erlang:unlink(P) end]}].
+               erlang:unlink(P) end,
+      fun() ->
+              %% Regression test case for embedded error properties in function return values
+              P = test_util:get_thing(),
+              ?assertMatch(ok, js:define(P, <<"function return_error_property() { return [{\"value\": \"some_value\", \"list\": [{\"error\": \"some_error\"}]}]; }">>)),
+              ?assertMatch({ok,[{struct,[{<<"value">>,<<"some_value">>},{<<"list">>,[{struct,[{<<"error">>,<<"some_error">>}]}]}]}]}, js:call(P, <<"return_error_property">>, [])),
+              erlang:unlink(P) end      
+      ]      
+     }].
 
 binding_test_() ->
     [{setup, fun test_util:port_setup/0,

@@ -115,7 +115,7 @@ void run_js(void *jsargs) {
     char *filename = read_string(&data);
     char *code = read_string(&data);
     result = sm_eval(dd->vm, filename, code, 1);
-    if (strstr(result, "{\"error\"") != NULL) {
+    if ((strncmp(result, "[{\"error\":\"notfound\"}]", 22) == 0) || (strncmp(result, "{\"error\"", 8) == 0)) {
       send_error_string_response(dd, call_id, result);
     }
     else {
