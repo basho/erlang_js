@@ -237,6 +237,10 @@ char *sm_eval(spidermonkey_vm *vm, const char *filename, const char *code, int h
   JSScript *script;
   jsval result;
 
+  if (code == NULL) { 
+      return NULL;
+  }
+
   begin_request(vm);
   script = JS_CompileScript(vm->context,
 			    vm->global,
