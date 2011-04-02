@@ -11,6 +11,15 @@ var_test_() ->
                ?assertMatch({ok, 100}, js:eval(P, <<"x;">>)),
                erlang:unlink(P) end]}].
 
+null_define_test_() ->
+    [{setup, fun test_util:port_setup/0,
+      fun test_util:port_teardown/1,
+      [fun() ->
+               P = test_util:get_thing(),
+               ?assertMatch(ok, js:define(P, "")),
+               erlang:unlink(P) end]}].
+
+
 function_test_() ->
     [{setup, fun test_util:port_setup/0,
       fun test_util:port_teardown/1,
