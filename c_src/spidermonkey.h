@@ -27,6 +27,7 @@ typedef struct _spidermonkey_error_t {
 typedef struct _spidermonkey_state_t {
   int branch_count;
   spidermonkey_error *error;
+  int terminate;
 } spidermonkey_state;
 
 typedef struct _spidermonkey_vm_t {

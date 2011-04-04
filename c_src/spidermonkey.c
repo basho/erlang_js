@@ -15,6 +15,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include <time.h>
 #include <erl_driver.h>
 
@@ -85,6 +86,10 @@ JSBool on_branch(JSContext *context, JSScript *script) {
   else if(state->branch_count % 100 == 0) {
     JS_MaybeGC(context);
   }
+  else if (state->terminate)  {
+      return JS_FALSE;
+  }
+
   return JS_TRUE;
 }
 
@@ -133,6 +138,7 @@ spidermonkey_vm *sm_initialize(long thread_stack, long heap_size) {
   spidermonkey_state *state = (spidermonkey_state *) driver_alloc(sizeof(spidermonkey_state));
   state->branch_count = 0;
   state->error = NULL;
+  state->terminate = 0;
   int gc_size = (int) heap_size * 0.25;
   vm->runtime = JS_NewRuntime(MAX_GC_SIZE);
   JS_SetGCParameter(vm->runtime, JSGC_MAX_BYTES, heap_size);
@@ -159,8 +165,20 @@ spidermonkey_vm *sm_initialize(long thread_stack, long heap_size) {
 }
 
 void sm_stop(spidermonkey_vm *vm) {
-  JS_SetContextThread(vm->context);
+  begin_request(vm);
   spidermonkey_state *state = (spidermonkey_state *) JS_GetContextPrivate(vm->context);
+  state->terminate = 1;
+  JS_SetContextPrivate(vm->context, state);
+ 
+  //Wait for any executing function to stop
+  //before beginning to free up any memory.
+  while (JS_IsRunning(vm->context))  {
+      sleep(1);
+  }
+
+  //Now we should be free to proceed with
+  //freeing up memory without worrying about
+  //crashing the VM.
   if (state != NULL) {
     if (state->error != NULL) {
       free_error(state);
@@ -170,6 +188,7 @@ void sm_stop(spidermonkey_vm *vm) {
   JS_SetContextPrivate(vm->context, NULL);
   JS_DestroyContext(vm->context);
   JS_DestroyRuntime(vm->runtime);
+  end_request(vm);
   driver_free(vm);
 }
 
@@ -245,7 +264,7 @@ char *sm_eval(spidermonkey_vm *vm, const char *filename, const char *code, int h
   spidermonkey_state *state = (spidermonkey_state *) JS_GetContextPrivate(vm->context);
   if (state->error == NULL) {
     JS_ClearPendingException(vm->context);
-    JS_ExecuteScript(vm->context, vm->global, script, &result);
+    JS_ExecuteScript(vm->context, vm->global, script, &result);   
     state = (spidermonkey_state *) JS_GetContextPrivate(vm->context);
     if (state->error == NULL) {
       if (handle_retval) {
