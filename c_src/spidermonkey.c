@@ -77,20 +77,22 @@ void on_error(JSContext *context, const char *message, JSErrorReport *report) {
 }
 
 JSBool on_branch(JSContext *context, JSScript *script) {
+  JSBool return_value = JS_TRUE;
   spidermonkey_state *state = (spidermonkey_state *) JS_GetContextPrivate(context);
   state->branch_count++;
-  if (state->branch_count == 550) {
+
+  if (state->terminate)  {
+      return_value = JS_FALSE;
+  }
+  else if (state->branch_count == 550) {
     JS_GC(context);
     state->branch_count = 0;
   }
   else if(state->branch_count % 100 == 0) {
     JS_MaybeGC(context);
   }
-  else if (state->terminate)  {
-      return JS_FALSE;
-  }
 
-  return JS_TRUE;
+  return return_value;
 }
 
 void write_timestamp(FILE *fd) {
