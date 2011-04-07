@@ -1,25 +1,25 @@
+# This is a stub Makefile that invokes GNU make which will read the GNUmakefile
+# instead of this file. This provides compatability on systems where GNU make is
+# not the system 'make' (eg. most non-linux UNIXes).
 
 all:
-	$(REBAR) compile
+	@gmake all
 
 verbose:
-	$(REBAR) compile verbose=1
+	@gmake verbose
+
+test:
+	@gmake test
+
+docs:
+	@gmake docs
+
+c_src: FORCE
+	@gmake c_src
+FORCE:
+
+c_src_clean:
+	@gmake c_src_clean
 
 clean:
-	rm -rf tests_ebin docs
-	$(REBAR) clean
-	cd c_src; $(MAKE) clean
-
-test: all
-	@mkdir -p tests_ebin
-	@cd tests;erl -make
-	@erl -noshell -boot start_sasl -pa ebin -pa tests_ebin -s erlang_js -eval 'test_suite:test().' -s init stop
-	@rm -f ebin/test_* ebin/*_tests.erl
-
-docs: all
-	@mkdir -p docs
-	@./build_docs.sh
-
-include rebar.mk
-
-
+	@gmake clean

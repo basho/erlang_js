@@ -1,10 +1,17 @@
 # This Makefile builds the dependencies (libjs and libnspr) needed by
 # spidermonkey_drv.so
 
+UNAME	:= $(shell uname -s)
 TAR		?= tar
 GUNZIP		?= gunzip
 SMONKEY_VER	:= 1.8.0-rc1
 NSPR_VER	:= 4.8
+
+ifeq ($(UNAME),SunOS)
+	PATCH	?= gpatch
+else
+	PATCH	?= patch
+endif
 
 SYSTEM_DIR := $(CURDIR)/system
 LIB_DIR    := $(SYSTEM_DIR)/lib
@@ -20,7 +27,7 @@ js: $(LIB_DIR)/libjs.a
 $(LIB_DIR)/libjs.a: $(LIB_DIR)/libnspr4.a
 	$(GUNZIP) -c js-$(SMONKEY_VER).tar.gz | $(TAR) xf -
 	@for I in patches/js-*.patch; do \
-		(patch -p1 < $${I} || echo "Skipping patch"); \
+		($(PATCH) -p1 < $${I} || echo "Skipping patch"); \
 	done
 	@$(MAKE) -C $(JS_DIR)/src BUILD_OPT=1 JS_DIST=$(SYSTEM_DIR) \
 		JS_THREADSAFE=1 \
@@ -35,6 +42,9 @@ $(LIB_DIR)/libjs.a: $(LIB_DIR)/libnspr4.a
 
 $(LIB_DIR)/libnspr4.a:
 	$(GUNZIP) -c nsprpub-$(NSPR_VER).tar.gz | $(TAR) xf -
+	@for I in patches/nspr-*.patch; do \
+		($(PATCH) -p1 < $${I} || echo "Skipping patch"); \
+	done
 	(cd $(NSPR_DIR) && \
 	 ./configure --disable-debug --enable-optimize \
                      --prefix=$(SYSTEM_DIR) $(NSPR_SIXTYFOUR) && \
