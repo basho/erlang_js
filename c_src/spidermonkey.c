@@ -178,6 +178,8 @@ void sm_stop(spidermonkey_vm *vm) {
       sleep(1);
   }
 
+  end_request(vm);
+
   //Now we should be free to proceed with
   //freeing up memory without worrying about
   //crashing the VM.
@@ -190,7 +192,6 @@ void sm_stop(spidermonkey_vm *vm) {
   JS_SetContextPrivate(vm->context, NULL);
   JS_DestroyContext(vm->context);
   JS_DestroyRuntime(vm->runtime);
-  end_request(vm);
   driver_free(vm);
 }
 
