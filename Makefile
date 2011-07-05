@@ -1,12 +1,13 @@
+
 all:
-	./rebar compile
+	$(REBAR) compile
 
 verbose:
-	./rebar compile verbose=1
+	$(REBAR) compile verbose=1
 
 clean:
 	rm -rf tests_ebin docs
-	./rebar clean
+	$(REBAR) clean
 	cd c_src; $(MAKE) clean
 
 test: all
@@ -18,3 +19,7 @@ test: all
 docs: all
 	@mkdir -p docs
 	@./build_docs.sh
+
+include rebar.mk
+
+
