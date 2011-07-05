@@ -15,9 +15,9 @@ $(warning Rebar not installed or available. Try 'make rebar-info')
 endif
 
 ifneq ($(strip $(shell which wget)), )
-REBAR_FETCH ?= wget -q -O - $(REBAR_URL)
+REBAR_FETCH ?= wget --no-check-certificate -q -O - $(REBAR_URL)
 else
-REBAR_FETCH ?= curl -f $(REBAR_URL)
+REBAR_FETCH ?= curl -s -f $(REBAR_URL)
 endif
 
 
