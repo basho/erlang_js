@@ -1,0 +1,14 @@
+--- c_src/nsprpub.old/pr/src/misc/prnetdb.c	2011-03-31 21:51:51 -0400
++++ c_src/nsprpub/pr/src/misc/prnetdb.c	2011-03-31 21:53:08 -0400
+@@ -114,6 +114,11 @@
+ #define _PR_HAVE_5_ARG_GETPROTO_R
+ #endif
+ 
++#if __DragonFly_version >= 200202
++#define _PR_HAVE_GETPROTO_R
++#define _PR_HAVE_5_ARG_GETPROTO_R
++#endif
++
+ /* BeOS has glibc but not the glibc-style getprotobyxxx_r functions. */
+ #if (defined(__GLIBC__) && __GLIBC__ >= 2 && !defined(XP_BEOS))
+ #define _PR_HAVE_GETPROTO_R
