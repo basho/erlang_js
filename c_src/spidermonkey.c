@@ -44,12 +44,12 @@ char *copy_jsstring(JSString *source) {
   return copy_string(buf);
 }
 
-inline void begin_request(spidermonkey_vm *vm) {
+void begin_request(spidermonkey_vm *vm) {
   JS_SetContextThread(vm->context);
   JS_BeginRequest(vm->context);
 }
 
-inline void end_request(spidermonkey_vm *vm) {
+void end_request(spidermonkey_vm *vm) {
   JS_EndRequest(vm->context);
   JS_ClearContextThread(vm->context);
 }
