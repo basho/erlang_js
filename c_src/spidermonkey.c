@@ -102,8 +102,8 @@ void write_timestamp(FILE *fd) {
   t = time(NULL);
   tmp = localtime(&t); /* or gmtime, if you want GMT^H^H^HUTC */
   fprintf(fd, "%02d/%02d/%04d (%02d:%02d:%02d): ",
-	  tmp->tm_mon+1, tmp->tm_mday, tmp->tm_year+1900,
-	  tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
+          tmp->tm_mon+1, tmp->tm_mday, tmp->tm_year+1900,
+          tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
 }
 
 JSBool js_log(JSContext *cx, uintN argc, jsval *vp) {
@@ -131,7 +131,7 @@ JSBool js_log(JSContext *cx, uintN argc, jsval *vp) {
   return JSVAL_TRUE;
 }
 
-void sm_configure_locale() {
+void sm_configure_locale(void) {
   JS_SetCStringsAreUTF8();
 }
 
@@ -160,7 +160,7 @@ spidermonkey_vm *sm_initialize(long thread_stack, long heap_size) {
   JS_SetContextPrivate(vm->context, state);
   JSNative *funptr = (JSNative *) *js_log;
   JS_DefineFunction(vm->context, JS_GetGlobalObject(vm->context), "ejsLog", funptr,
-		    0, JSFUN_FAST_NATIVE);
+                    0, JSFUN_FAST_NATIVE);
   end_request(vm);
 
   return vm;
@@ -171,7 +171,7 @@ void sm_stop(spidermonkey_vm *vm) {
   spidermonkey_state *state = (spidermonkey_state *) JS_GetContextPrivate(vm->context);
   state->terminate = 1;
   JS_SetContextPrivate(vm->context, state);
- 
+
   //Wait for any executing function to stop
   //before beginning to free up any memory.
   while (JS_IsRunning(vm->context))  {
@@ -195,7 +195,7 @@ void sm_stop(spidermonkey_vm *vm) {
   driver_free(vm);
 }
 
-void sm_shutdown() {
+void sm_shutdown(void) {
   JS_ShutDown();
 }
 
@@ -209,20 +209,20 @@ char *escape_quotes(char *text) {
   for (i = 0; i < strlen(text); i++) {
     if (text[i] == '"') {
       if(!escaped) {
-	memcpy(&buf[x], (char *) "\\\"", 2);
-	x += 2;
+        memcpy(&buf[x], (char *) "\\\"", 2);
+        x += 2;
       }
       else {
-	memcpy(&buf[x], &text[i], 1);
-	x++;
+        memcpy(&buf[x], &text[i], 1);
+        x++;
       }
     }
     else {
       if(text[i] =='\\') {
-	escaped = 1;
+        escaped = 1;
       }
       else {
-	escaped = 0;
+        escaped = 0;
       }
       memcpy(&buf[x], &text[i], 1);
       x++;
@@ -242,7 +242,7 @@ char *error_to_json(const spidermonkey_error *error) {
   char *retval = (char *) driver_alloc(size);
 
   snprintf(retval, size, "{\"error\": {\"lineno\": %d, \"message\": \"%s\", \"source\": \"%s\"}}",
-	   error->lineno, error->msg, escaped_source);
+           error->lineno, error->msg, escaped_source);
   driver_free(escaped_source);
   return retval;
 }
@@ -259,32 +259,32 @@ char *sm_eval(spidermonkey_vm *vm, const char *filename, const char *code, int h
   JSScript *script;
   jsval result;
 
-  if (code == NULL) { 
+  if (code == NULL) {
       return NULL;
   }
 
   begin_request(vm);
   script = JS_CompileScript(vm->context,
-			    vm->global,
-			    code, strlen(code),
-			    filename, 1);
+                            vm->global,
+                            code, strlen(code),
+                            filename, 1);
   spidermonkey_state *state = (spidermonkey_state *) JS_GetContextPrivate(vm->context);
   if (state->error == NULL) {
     JS_ClearPendingException(vm->context);
-    JS_ExecuteScript(vm->context, vm->global, script, &result);   
+    JS_ExecuteScript(vm->context, vm->global, script, &result);
     state = (spidermonkey_state *) JS_GetContextPrivate(vm->context);
     if (state->error == NULL) {
       if (handle_retval) {
-	if (JSVAL_IS_STRING(result)) {
-	  JSString *str = JS_ValueToString(vm->context, result);
-	  retval = copy_jsstring(str);
-	}
-	else if(strcmp(JS_GetStringBytes(JS_ValueToString(vm->context, result)), "undefined") == 0) {
-	  retval = copy_string("{\"error\": \"Expression returned undefined\", \"lineno\": 0, \"source\": \"unknown\"}");
-	}
-	else {
-	  retval = copy_string("{\"error\": \"non-JSON return value\", \"lineno\": 0, \"source\": \"unknown\"}");
-	}
+        if (JSVAL_IS_STRING(result)) {
+          JSString *str = JS_ValueToString(vm->context, result);
+          retval = copy_jsstring(str);
+        }
+        else if(strcmp(JS_GetStringBytes(JS_ValueToString(vm->context, result)), "undefined") == 0) {
+          retval = copy_string("{\"error\": \"Expression returned undefined\", \"lineno\": 0, \"source\": \"unknown\"}");
+        }
+        else {
+          retval = copy_string("{\"error\": \"non-JSON return value\", \"lineno\": 0, \"source\": \"unknown\"}");
+        }
       }
       JS_DestroyScript(vm->context, script);
     }

@@ -44,7 +44,7 @@ typedef void (*asyncfun)(void *);
 
 /* Forward declarations */
 static ErlDrvData start(ErlDrvPort port, char *cmd);
-static int init();
+static int init(void);
 static void stop(ErlDrvData handle);
 static void process(ErlDrvData handle, ErlIOVec *ev);
 static void ready_async(ErlDrvData handle, ErlDrvThreadData async_data);
@@ -75,8 +75,8 @@ static ErlDrvEntry spidermonkey_drv_entry = {
 
 void send_immediate_ok_response(spidermonkey_drv_t *dd, const char *call_id) {
   ErlDrvTermData terms[] = {ERL_DRV_BUF2BINARY, (ErlDrvTermData) call_id, strlen(call_id),
-			    ERL_DRV_ATOM, dd->atom_ok,
-			    ERL_DRV_TUPLE, 2};
+                            ERL_DRV_ATOM, dd->atom_ok,
+                            ERL_DRV_TUPLE, 2};
   driver_output_term(dd->port, terms, sizeof(terms) / sizeof(terms[0]));
 }
 
@@ -93,8 +93,8 @@ void send_ok_response(spidermonkey_drv_t *dd, js_call *call_data,
                       const char *call_id) {
   ErlDrvTermData terms[] = {ERL_DRV_BUF2BINARY,
                             (ErlDrvTermData) call_data->return_call_id,strlen(call_id),
-			    ERL_DRV_ATOM, dd->atom_ok,
-			    ERL_DRV_TUPLE, 2};
+                            ERL_DRV_ATOM, dd->atom_ok,
+                            ERL_DRV_TUPLE, 2};
   COPY_DATA(call_data, call_id, terms);
 }
 
@@ -103,8 +103,8 @@ void send_error_string_response(spidermonkey_drv_t *dd, js_call *call_data,
   ErlDrvTermData terms[] = {ERL_DRV_BUF2BINARY,
                             (ErlDrvTermData) call_data->return_call_id,strlen(call_id),
                             ERL_DRV_ATOM, dd->atom_error,
-			    ERL_DRV_BUF2BINARY, (ErlDrvTermData) msg, strlen(msg),
-			    ERL_DRV_TUPLE, 3};
+                            ERL_DRV_BUF2BINARY, (ErlDrvTermData) msg, strlen(msg),
+                            ERL_DRV_TUPLE, 3};
   COPY_DATA(call_data, call_id, terms);
   call_data->return_string = msg;
 }
@@ -114,8 +114,8 @@ void send_string_response(spidermonkey_drv_t *dd, js_call *call_data,
   ErlDrvTermData terms[] = {ERL_DRV_BUF2BINARY,
                             (ErlDrvTermData) call_data->return_call_id,strlen(call_id),
                             ERL_DRV_ATOM, dd->atom_ok,
-			    ERL_DRV_BUF2BINARY, (ErlDrvTermData) result, strlen(result),
-			    ERL_DRV_TUPLE, 3};
+                            ERL_DRV_BUF2BINARY, (ErlDrvTermData) result, strlen(result),
+                            ERL_DRV_TUPLE, 3};
   COPY_DATA(call_data, call_id, terms);
   call_data->return_string = result;
 }
@@ -125,8 +125,8 @@ void unknown_command(spidermonkey_drv_t *dd, js_call *call_data,
   ErlDrvTermData terms[] = {ERL_DRV_BUF2BINARY,
                             (ErlDrvTermData) call_data->return_call_id,strlen(call_id),
                             ERL_DRV_ATOM, dd->atom_error,
-			    ERL_DRV_ATOM, dd->atom_unknown_cmd,
-			    ERL_DRV_TUPLE, 3};
+                            ERL_DRV_ATOM, dd->atom_unknown_cmd,
+                            ERL_DRV_TUPLE, 3};
   COPY_DATA(call_data, call_id, terms);
 }
 
@@ -179,7 +179,7 @@ DRIVER_INIT(spidermonkey_drv) {
   return &spidermonkey_drv_entry;
 }
 
-static int init() {
+static int init(void) {
   sm_configure_locale();
   return 0;
 }
