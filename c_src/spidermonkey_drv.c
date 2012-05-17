@@ -20,6 +20,7 @@
 #include "spidermonkey.h"
 #include "config.h"
 #include "driver_comm.h"
+#include "erl_compatibility.h"
 
 typedef struct _spidermonkey_drv_t {
   ErlDrvPort port;
@@ -185,7 +186,7 @@ static int init(void) {
 }
 
 static ErlDrvData start(ErlDrvPort port, char *cmd) {
-  spidermonkey_drv_t *retval = (spidermonkey_drv_t*) driver_alloc(sizeof(spidermonkey_drv_t));
+  spidermonkey_drv_t *retval = (spidermonkey_drv_t*) driver_alloc((ErlDrvSizeT) sizeof(spidermonkey_drv_t));
   retval->port = port;
   retval->shutdown = 0;
   retval->atom_ok = driver_mk_atom((char *) "ok");
@@ -223,7 +224,7 @@ static void process(ErlDrvData handle, ErlIOVec *ev) {
     driver_free(call_id);
   }
   else {
-    js_call *call_data = (js_call *) driver_alloc(sizeof(js_call));
+    js_call *call_data = (js_call *) driver_alloc((ErlDrvSizeT) sizeof(js_call));
     call_data->driver_data = dd;
     call_data->args = ev->binv[1];
     call_data->return_terms[0] = 0;
@@ -231,8 +232,9 @@ static void process(ErlDrvData handle, ErlIOVec *ev) {
     call_data->return_string = NULL;
     driver_binary_inc_refc(call_data->args);
     ErlDrvPort port = dd->port;
-    unsigned long thread_key = (unsigned long) port;
-    driver_async(dd->port, (unsigned int *) &thread_key, (asyncfun) run_js, (void *) call_data, NULL);
+    intptr_t port_ptr = (intptr_t) port;
+    unsigned int thread_key = port_ptr;
+    driver_async(dd->port, &thread_key, (asyncfun) run_js, (void *) call_data, NULL);
   }
   driver_free(command);
 }
@@ -245,7 +247,9 @@ ready_async(ErlDrvData handle, ErlDrvThreadData async_data)
 
   driver_output_term(dd->port,
                    call_data->return_terms, call_data->return_term_count);
-  driver_binary_dec_refc(call_data->args);
+
+  driver_free_binary(call_data->args);
+
   if (call_data->return_string != NULL) {
     driver_free((void *) call_data->return_string);
   }

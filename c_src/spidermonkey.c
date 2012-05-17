@@ -20,6 +20,7 @@
 #include <erl_driver.h>
 
 #include "spidermonkey.h"
+#include "erl_compatibility.h"
 
 void free_error(spidermonkey_state *state);
 
@@ -32,8 +33,8 @@ static JSClass global_class = {
 };
 
 char *copy_string(const char *source) {
-  int size = strlen(source) + 1;
-  char *retval = driver_alloc(size);
+  size_t size = strlen(source) + 1;
+  char *retval = driver_alloc((ErlDrvSizeT) size);
   memset(retval, 0, size);
   strncpy(retval, source, size - 1);
   return retval;
@@ -56,7 +57,7 @@ void end_request(spidermonkey_vm *vm) {
 
 void on_error(JSContext *context, const char *message, JSErrorReport *report) {
   if (report->flags & JSREPORT_EXCEPTION) {
-    spidermonkey_error *sm_error = (spidermonkey_error *) driver_alloc(sizeof(spidermonkey_error));
+    spidermonkey_error *sm_error = (spidermonkey_error *) driver_alloc((ErlDrvSizeT) sizeof(spidermonkey_error));
     if (message != NULL) {
       sm_error->msg = copy_string(message);
     }
@@ -136,8 +137,8 @@ void sm_configure_locale(void) {
 }
 
 spidermonkey_vm *sm_initialize(long thread_stack, long heap_size) {
-  spidermonkey_vm *vm = (spidermonkey_vm*) driver_alloc(sizeof(spidermonkey_vm));
-  spidermonkey_state *state = (spidermonkey_state *) driver_alloc(sizeof(spidermonkey_state));
+  spidermonkey_vm *vm = (spidermonkey_vm*) driver_alloc((ErlDrvSizeT) sizeof(spidermonkey_vm));
+  spidermonkey_state *state = (spidermonkey_state *) driver_alloc((ErlDrvSizeT) sizeof(spidermonkey_state));
   state->branch_count = 0;
   state->error = NULL;
   state->terminate = 0;
@@ -200,8 +201,8 @@ void sm_shutdown(void) {
 }
 
 char *escape_quotes(char *text) {
-  int bufsize = strlen(text) * 2;
-  char *buf = (char *) driver_alloc(bufsize);
+  size_t bufsize = strlen(text) * 2;
+  char *buf = (char *) driver_alloc((ErlDrvSizeT) bufsize);
   memset(buf, 0, bufsize);
   int i = 0;
   int x = 0;
@@ -228,9 +229,10 @@ char *escape_quotes(char *text) {
       x++;
     }
   }
-  char *retval = (char *) driver_alloc(strlen(buf) + 1);
-  memset(retval, 0, strlen(buf) + 1);
-  strncpy(retval, buf, strlen(buf));
+  size_t buf_size = strlen(buf);
+  char *retval = (char *) driver_alloc((ErlDrvSizeT) buf_size + 1);
+  memset(retval, 0, buf_size + 1);
+  strncpy(retval, buf, buf_size);
   driver_free(buf);
   return retval;
 }
@@ -238,8 +240,8 @@ char *escape_quotes(char *text) {
 char *error_to_json(const spidermonkey_error *error) {
   char *escaped_source = escape_quotes(error->offending_source);
   /* size = length(escaped source) + length(error msg) + JSON formatting */
-  int size = (strlen(escaped_source) + strlen(error->msg) + 80) * sizeof(char);
-  char *retval = (char *) driver_alloc(size);
+  size_t size = (strlen(escaped_source) + strlen(error->msg) + 80) * sizeof(char);
+  char *retval = (char *) driver_alloc((ErlDrvSizeT) size);
 
   snprintf(retval, size, "{\"error\": {\"lineno\": %d, \"message\": \"%s\", \"source\": \"%s\"}}",
            error->lineno, error->msg, escaped_source);
