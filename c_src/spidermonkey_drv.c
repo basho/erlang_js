@@ -15,6 +15,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <stdint.h>
 #include <erl_driver.h>
 
 #include "spidermonkey.h"
