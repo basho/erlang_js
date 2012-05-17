@@ -39,13 +39,13 @@ typedef struct _spidermonkey_vm_t {
 /* Bytes to allocate before GC */
 #define MAX_GC_SIZE 1024 * 1024
 
-void sm_configure_locale();
+void sm_configure_locale(void);
 
 spidermonkey_vm *sm_initialize(long thread_stack, long heap_size);
 
 void sm_stop(spidermonkey_vm *vm);
 
-void sm_shutdown();
+void sm_shutdown(void);
 
 char *sm_eval(spidermonkey_vm *vm, const char *filename, const char *code, int handle_retval);
 

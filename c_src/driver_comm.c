@@ -21,21 +21,23 @@
 #include <erl_driver.h>
 
 #include "driver_comm.h"
+#include "erl_compatibility.h"
 
 inline int read_int32(char **data) {
   char *d = *data;
   int value = ((((int)(((unsigned char*) (d))[0]))  << 24) |
-	       (((int)(((unsigned char*) (d))[1]))  << 16) |
-	       (((int)(((unsigned char*) (d))[2]))  << 8)  |
-	       (((int)(((unsigned char*) (d))[3]))));
+               (((int)(((unsigned char*) (d))[1]))  << 16) |
+               (((int)(((unsigned char*) (d))[2]))  << 8)  |
+               (((int)(((unsigned char*) (d))[3]))));
   (*data) += 4;
   return value;
 }
 
 char *read_command(char **data) {
-  char *buf = (char *) driver_alloc(COMMAND_SIZE + 1);
-  memset(buf, 0, COMMAND_SIZE + 1);
-  memcpy(buf, (const char *) *data, COMMAND_SIZE);
+  ErlDrvSizeT allocSize = COMMAND_SIZE + 1;
+  char *buf = (char *) driver_alloc(allocSize);
+  memset(buf, 0, (size_t) allocSize);
+  memcpy(buf, (const char *) *data, (size_t) COMMAND_SIZE);
   (*data) += 2;
   return buf;
 }
@@ -44,9 +46,9 @@ char *read_string(char **data) {
   int length = read_int32(data);
   char *buf = NULL;
   if (length > 0) {
-    buf = (char *) driver_alloc(length + 1);
-    memset(buf, 0, length + 1);
-    memcpy(buf, (const char *) *data, length);
+    buf = (char *) driver_alloc((ErlDrvSizeT) length + 1);
+    memset(buf, 0, (size_t)length + 1);
+    memcpy(buf, (const char *) *data, (size_t) length);
     (*data) += length;
   }
   return buf;
