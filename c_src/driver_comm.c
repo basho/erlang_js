@@ -35,7 +35,7 @@ inline int read_int32(char **data) {
 
 char *read_command(char **data) {
   ErlDrvSizeT allocSize = COMMAND_SIZE + 1;
-  char *buf = (char *) driver_alloc(allocSize);
+  char *buf = driver_alloc(allocSize);
   memset(buf, 0, (size_t) allocSize);
   memcpy(buf, (const char *) *data, (size_t) COMMAND_SIZE);
   (*data) += 2;
@@ -46,7 +46,7 @@ char *read_string(char **data) {
   int length = read_int32(data);
   char *buf = NULL;
   if (length > 0) {
-    buf = (char *) driver_alloc((ErlDrvSizeT) length + 1);
+    buf = driver_alloc((ErlDrvSizeT) length + 1);
     memset(buf, 0, (size_t)length + 1);
     memcpy(buf, (const char *) *data, (size_t) length);
     (*data) += length;

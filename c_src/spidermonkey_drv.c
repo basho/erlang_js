@@ -187,7 +187,7 @@ static int init(void) {
 }
 
 static ErlDrvData start(ErlDrvPort port, char *cmd) {
-  spidermonkey_drv_t *retval = (spidermonkey_drv_t*) driver_alloc((ErlDrvSizeT) sizeof(spidermonkey_drv_t));
+  spidermonkey_drv_t *retval = driver_alloc((ErlDrvSizeT) sizeof(spidermonkey_drv_t));
   retval->port = port;
   retval->shutdown = 0;
   retval->atom_ok = driver_mk_atom((char *) "ok");
@@ -225,7 +225,7 @@ static void process(ErlDrvData handle, ErlIOVec *ev) {
     driver_free(call_id);
   }
   else {
-    js_call *call_data = (js_call *) driver_alloc((ErlDrvSizeT) sizeof(js_call));
+    js_call *call_data = driver_alloc((ErlDrvSizeT) sizeof(js_call));
     call_data->driver_data = dd;
     call_data->args = ev->binv[1];
     call_data->return_terms[0] = 0;

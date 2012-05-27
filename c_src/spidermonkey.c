@@ -57,7 +57,7 @@ void end_request(spidermonkey_vm *vm) {
 
 void on_error(JSContext *context, const char *message, JSErrorReport *report) {
   if (report->flags & JSREPORT_EXCEPTION) {
-    spidermonkey_error *sm_error = (spidermonkey_error *) driver_alloc((ErlDrvSizeT) sizeof(spidermonkey_error));
+    spidermonkey_error *sm_error = driver_alloc((ErlDrvSizeT) sizeof(spidermonkey_error));
     if (message != NULL) {
       sm_error->msg = copy_string(message);
     }
@@ -137,8 +137,8 @@ void sm_configure_locale(void) {
 }
 
 spidermonkey_vm *sm_initialize(long thread_stack, long heap_size) {
-  spidermonkey_vm *vm = (spidermonkey_vm*) driver_alloc((ErlDrvSizeT) sizeof(spidermonkey_vm));
-  spidermonkey_state *state = (spidermonkey_state *) driver_alloc((ErlDrvSizeT) sizeof(spidermonkey_state));
+  spidermonkey_vm *vm = driver_alloc((ErlDrvSizeT) sizeof(spidermonkey_vm));
+  spidermonkey_state *state = driver_alloc((ErlDrvSizeT) sizeof(spidermonkey_state));
   state->branch_count = 0;
   state->error = NULL;
   state->terminate = 0;
@@ -202,7 +202,7 @@ void sm_shutdown(void) {
 
 char *escape_quotes(char *text) {
   size_t bufsize = strlen(text) * 2;
-  char *buf = (char *) driver_alloc((ErlDrvSizeT) bufsize);
+  char *buf = driver_alloc((ErlDrvSizeT) bufsize);
   memset(buf, 0, bufsize);
   int i = 0;
   int x = 0;
@@ -230,7 +230,7 @@ char *escape_quotes(char *text) {
     }
   }
   size_t buf_size = strlen(buf);
-  char *retval = (char *) driver_alloc((ErlDrvSizeT) buf_size + 1);
+  char *retval = driver_alloc((ErlDrvSizeT) buf_size + 1);
   memset(retval, 0, buf_size + 1);
   strncpy(retval, buf, buf_size);
   driver_free(buf);
@@ -240,8 +240,8 @@ char *escape_quotes(char *text) {
 char *error_to_json(const spidermonkey_error *error) {
   char *escaped_source = escape_quotes(error->offending_source);
   /* size = length(escaped source) + length(error msg) + JSON formatting */
-  size_t size = (strlen(escaped_source) + strlen(error->msg) + 80) * sizeof(char);
-  char *retval = (char *) driver_alloc((ErlDrvSizeT) size);
+  size_t size = strlen(escaped_source) + strlen(error->msg) + 80;
+  char *retval = driver_alloc((ErlDrvSizeT) size);
 
   snprintf(retval, size, "{\"error\": {\"lineno\": %d, \"message\": \"%s\", \"source\": \"%s\"}}",
            error->lineno, error->msg, escaped_source);
