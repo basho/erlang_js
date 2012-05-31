@@ -161,7 +161,7 @@ spidermonkey_vm *sm_initialize(long thread_stack, long heap_size) {
   JS_SetBranchCallback(vm->context, on_branch);
   JS_SetContextPrivate(vm->context, state);
   JSNative *funptr = (JSNative *) *js_log;
-  JS_DefineFunction(vm->context, JS_GetGlobalObject(vm->context), "ejsLog", funptr,
+  JS_DefineFunction(vm->context, JS_GetGlobalObject(vm->context), "ejsLog", *funptr,
                     0, JSFUN_FAST_NATIVE);
   end_request(vm);
 
