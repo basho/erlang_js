@@ -46,8 +46,8 @@ char *read_string(char **data) {
   char *buf = NULL;
   if (length > 0) {
     buf = ejs_alloc(length + 1);
-    memset(buf, 0, (size_t)length + 1);
-    memcpy(buf, (const char *) *data, (size_t) length);
+    memcpy(buf, (const char *) *data, length);
+    buf[length] = '\0';
     (*data) += length;
   }
   return buf;
