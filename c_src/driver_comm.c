@@ -34,10 +34,9 @@ inline int read_int32(char **data) {
 }
 
 char *read_command(char **data) {
-  ErlDrvSizeT allocSize = COMMAND_SIZE + 1;
-  char *buf = driver_alloc(allocSize);
-  memset(buf, 0, (size_t) allocSize);
-  memcpy(buf, (const char *) *data, (size_t) COMMAND_SIZE);
+  char *buf = ejs_alloc(COMMAND_SIZE + 1);
+  memcpy(buf, (const char *) *data, COMMAND_SIZE);
+  buf[COMMAND_SIZE] = '\0';
   (*data) += 2;
   return buf;
 }
@@ -46,10 +45,18 @@ char *read_string(char **data) {
   int length = read_int32(data);
   char *buf = NULL;
   if (length > 0) {
-    buf = driver_alloc((ErlDrvSizeT) length + 1);
+    buf = ejs_alloc(length + 1);
     memset(buf, 0, (size_t)length + 1);
     memcpy(buf, (const char *) *data, (size_t) length);
     (*data) += length;
   }
   return buf;
+}
+
+void *ejs_alloc(ErlDrvSizeT size) {
+    void *p = driver_alloc(size);
+    if (p == NULL) {
+        erl_exit(1, "erlang_js: Can't allocate %lu bytes of memory\n", size);
+    }
+    return p;
 }
