@@ -26,4 +26,9 @@ char *read_command(char **data);
 /* freed with driver_free()                   */
 char *read_string(char **data);
 
+/* Wrapper around driver_alloc() that checks  */
+/* for OOM.                                   */
+void erl_exit(int n, char*, ...);
+void *ejs_alloc(ErlDrvSizeT size);
+
 #endif
