@@ -24,7 +24,7 @@ test: all
 docs: all
 	@mkdir -p docs
 	@./build_docs.sh
-	
-.PHONY: c_src docs
+
+.PHONY: c_src c_src_clean docs
 
 include rebar.mk
