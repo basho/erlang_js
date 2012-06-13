@@ -21,7 +21,6 @@
 #include <erl_driver.h>
 
 #include "driver_comm.h"
-#include "erl_compatibility.h"
 
 inline int read_int32(char **data) {
   char *d = *data;
