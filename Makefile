@@ -3,7 +3,7 @@
 # not the system 'make' (eg. most non-linux UNIXes).
 
 all:
-	@gmake all
+	gmake all
 
 verbose:
 	@gmake verbose
@@ -15,11 +15,12 @@ docs:
 	@gmake docs
 
 c_src: FORCE
-	@gmake c_src
+	gmake c_src
+
 FORCE:
 
 c_src_clean:
-	@gmake c_src_clean
+	gmake c_src_clean
 
 clean:
-	@gmake clean
+	gmake clean
