@@ -13,6 +13,8 @@
    See the License for the specific language governing permissions and
    limitations under the License. */
 
+#include "erl_compatibility.h"
+
 #ifndef __DRIVER_COMM__
 #define __DRIVER_COMM__
 
