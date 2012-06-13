@@ -10,7 +10,7 @@ clean: c_src_clean
 	$(REBAR) clean
 
 c_src:
-	cd c_src; $(MAKE) js
+	cd c_src; $(MAKE)
 
 c_src_clean:
 	cd c_src; $(MAKE) clean
