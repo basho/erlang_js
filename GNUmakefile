@@ -10,7 +10,7 @@ clean: c_src_clean
 	$(REBAR) clean
 
 c_src:
-	cd c_src; $(MAKE)
+	cd c_src; $(MAKE) js
 
 c_src_clean:
 	cd c_src; $(MAKE) clean
@@ -24,7 +24,7 @@ test: all
 docs: all
 	@mkdir -p docs
 	@./build_docs.sh
-	
+
 .PHONY: c_src docs
 
 include rebar.mk
