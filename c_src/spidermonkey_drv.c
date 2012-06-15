@@ -193,6 +193,13 @@ static ErlDrvData start(ErlDrvPort port, char *cmd) {
   retval->atom_ok = driver_mk_atom((char *) "ok");
   retval->atom_error = driver_mk_atom((char *) "error");
   retval->atom_unknown_cmd = driver_mk_atom((char *) "unknown_command");
+
+  /* Lock the driver in memory.  NSPR registers some thread cleanup
+  ** code in _pt_thread_death on the async thread pool which
+  ** gets called after spidermonkey_drv.so is unloaded on R15B
+  */
+  driver_lock_driver(port);
+
   return (ErlDrvData) retval;
 }
 
