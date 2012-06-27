@@ -1,5 +1,8 @@
 * erlang_js
 ** Overview
+
+   [[http://travis-ci.org/basho/erlang_js][Travis-CI]] :: [[https://secure.travis-ci.org/basho/erlang_js.png]]
+
    =erlang_js= is a linked-in driver, API, and OTP application that
    embeds Mozilla's Spidermonkey Javascript Virtual Machine in
    Erlang. Originally created to facilitate usage of Riak's MapReduce
@@ -27,7 +30,7 @@ make all test
 #+BEGIN_SRC shell
 erl -pa path/to/erlang_js/ebin -boot start_sasl
 #+END_SRC
-   
+
    Start the =erlang_js= application and create a Javascript VM.
 #+BEGIN_SRC erlang
 1> application:start(erlang_js).
