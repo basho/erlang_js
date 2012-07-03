@@ -28,7 +28,7 @@ void free_error(spidermonkey_state *state);
 /* The class of the global object. */
 static JSClass global_class = {
     "global", JSCLASS_GLOBAL_FLAGS,
-    JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
+    JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,
     JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, JS_FinalizeStub,
     JSCLASS_NO_OPTIONAL_MEMBERS
 };
@@ -41,9 +41,11 @@ char *copy_string(const char *source) {
   return retval;
 }
 
-char *copy_jsstring(JSString *source) {
-  char *buf = JS_GetStringBytes(source);
-  return copy_string(buf);
+char *copy_jsstring(JSContext *cx, JSString *source) {
+  char *buf = JS_EncodeString(cx, source);
+  char *retval = copy_string(buf);
+  JS_free(cx, buf);
+  return retval;
 }
 
 void begin_request(spidermonkey_vm *vm) {
@@ -78,7 +80,7 @@ void on_error(JSContext *context, const char *message, JSErrorReport *report) {
   }
 }
 
-JSBool on_branch(JSContext *context, JSScript *script) {
+JSBool on_branch(JSContext *context) {
   JSBool return_value = JS_TRUE;
   spidermonkey_state *state = (spidermonkey_state *) JS_GetContextPrivate(context);
   state->branch_count++;
@@ -116,8 +118,8 @@ JSBool js_log(JSContext *cx, uintN argc, jsval *vp) {
     jsval *argv = JS_ARGV(cx, vp);
     jsval jsfilename = argv[0];
     jsval jsoutput = argv[1];
-    char *filename = JS_GetStringBytes(JS_ValueToString(cx, jsfilename));
-    char *output = JS_GetStringBytes(JS_ValueToString(cx, jsoutput));
+    char *filename = JS_EncodeString(cx, JS_ValueToString(cx, jsfilename));
+    char *output = JS_EncodeString(cx, JS_ValueToString(cx, jsoutput));
     FILE *fd = fopen(filename, "a+");
     if (fd != NULL) {
       write_timestamp(fd);
@@ -129,6 +131,8 @@ JSBool js_log(JSContext *cx, uintN argc, jsval *vp) {
     else {
       JS_SET_RVAL(cx, vp, JSVAL_FALSE);
     }
+    JS_free(cx, filename);
+    JS_free(cx, output);
   }
   return JSVAL_TRUE;
 }
@@ -155,14 +159,14 @@ spidermonkey_vm *sm_initialize(long thread_stack, long heap_size) {
   JS_SetOptions(vm->context, JSOPTION_STRICT);
   JS_SetOptions(vm->context, JSOPTION_COMPILE_N_GO);
   JS_SetOptions(vm->context, JSVERSION_LATEST);
-  vm->global = JS_NewObject(vm->context, &global_class, NULL, NULL);
+  vm->global = JS_NewCompartmentAndGlobalObject(vm->context, &global_class, NULL);
   JS_InitStandardClasses(vm->context, vm->global);
   JS_SetErrorReporter(vm->context, on_error);
-  JS_SetBranchCallback(vm->context, on_branch);
+  JS_SetOperationCallback(vm->context, on_branch);
   JS_SetContextPrivate(vm->context, state);
   JSNative funptr = (JSNative) &js_log;
   JS_DefineFunction(vm->context, JS_GetGlobalObject(vm->context), "ejsLog", funptr,
-                    0, JSFUN_FAST_NATIVE);
+                    0, 0);
   end_request(vm);
 
   return vm;
@@ -259,7 +263,7 @@ void free_error(spidermonkey_state *state) {
 
 char *sm_eval(spidermonkey_vm *vm, const char *filename, const char *code, int handle_retval) {
   char *retval = NULL;
-  JSScript *script;
+  JSObject *script;
   jsval result;
 
   if (code == NULL) {
@@ -280,16 +284,19 @@ char *sm_eval(spidermonkey_vm *vm, const char *filename, const char *code, int h
       if (handle_retval) {
         if (JSVAL_IS_STRING(result)) {
           JSString *str = JS_ValueToString(vm->context, result);
-          retval = copy_jsstring(str);
-        }
-        else if(strcmp(JS_GetStringBytes(JS_ValueToString(vm->context, result)), "undefined") == 0) {
-          retval = copy_string("{\"error\": \"Expression returned undefined\", \"lineno\": 0, \"source\": \"unknown\"}");
+          retval = copy_jsstring(vm->context, str);
         }
         else {
-          retval = copy_string("{\"error\": \"non-JSON return value\", \"lineno\": 0, \"source\": \"unknown\"}");
+          char *tmp = JS_EncodeString(vm->context, JS_ValueToString(vm->context, result));
+	  if(strcmp(tmp, "undefined") == 0) {
+            retval = copy_string("{\"error\": \"Expression returned undefined\", \"lineno\": 0, \"source\": \"unknown\"}");
+	  }
+	  else {
+            retval = copy_string("{\"error\": \"non-JSON return value\", \"lineno\": 0, \"source\": \"unknown\"}");
+	  }
+	  JS_free(vm->context, tmp);
         }
       }
-      JS_DestroyScript(vm->context, script);
     }
     else {
       retval = error_to_json(state->error);
