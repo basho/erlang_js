@@ -81,6 +81,19 @@ json_test_() ->
        Struct = {struct, [{<<"test">>, <<"1">>}]},
        ?assertMatch(Struct, js_mochijson2:decode(js_mochijson2:encode(Struct))) end].
 
+ejslog_test_() ->
+    [{setup, fun test_util:port_setup/0,
+      fun test_util:port_teardown/1,
+      [fun() ->
+               P = test_util:get_thing(),
+               [] = os:cmd("rm -f /tmp/eval_tests.log"),
+               ?assertEqual({ok, true},
+                            js_driver:eval_js(P, <<"ejsLog('/tmp/eval_tests.log', 'Hello')">>)),
+               ?assert(filelib:is_file("/tmp/eval_tests.log")),
+               erlang:unlink(P)
+       end]}].
+
+
 error_test_() ->
     [{setup, fun test_util:port_setup/0,
       fun test_util:port_teardown/1,
