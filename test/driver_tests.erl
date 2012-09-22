@@ -30,5 +30,5 @@ destroy_test_() ->
 spinup_test_() ->
   [fun() ->
        F = fun({ok, P}) -> js_driver:destroy(P) end,
-       Ports = [js_driver:new() || X <- lists:seq(1, 16)],
+       Ports = [js_driver:new() || _X <- lists:seq(1, 16)],
        [F(P) || P <- Ports] end].
