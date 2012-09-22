@@ -16,10 +16,7 @@ c_src_clean:
 	cd c_src; $(MAKE) clean
 
 test: all
-	@mkdir -p tests_ebin
-	@cd tests;erl -make
-	@erl -noshell -boot start_sasl -pa ebin -pa tests_ebin -s erlang_js -eval 'test_suite:test().' -s init stop
-	@rm -f ebin/test_* ebin/*_tests.erl
+	$(REBAR) eunit
 
 docs: all
 	@mkdir -p docs
