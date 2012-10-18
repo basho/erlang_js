@@ -138,7 +138,8 @@ define_js(Ctx, FileName, Js, Timeout) when is_binary(FileName),
 %% @spec eval_js(port(), binary()) -> {ok, any()} | {error, any()}
 %% @doc Evaluate a Javascript expression and return the result
 eval_js(Ctx, Js) ->
-    eval_js(Ctx, Js, ?SCRIPT_TIMEOUT).
+    ScriptTimeout = app_helper:get_env(erlang_js, script_timeout, ?SCRIPT_TIMEOUT),
+    eval_js(Ctx, Js, ScriptTimeout).
 
 %% @private
 eval_js(Ctx, {file, FileName}, Timeout) ->
