@@ -131,6 +131,8 @@ define_js(Ctx, FileName, Js, Timeout) when is_binary(FileName),
         {error, ErrorJson} when is_binary(ErrorJson) ->
             {struct, [{<<"error">>, {struct, Error}}]} = js_mochijson2:decode(ErrorJson),
             {error, Error};
+        {error, Error} ->
+            {error, Error};
         ok ->
             ok
     end.
