@@ -19,6 +19,9 @@ c_src:
 c_src_clean:
 	cd c_src; $(MAKE) clean
 
+distclean: clean
+	$(REBAR) delete-deps
+
 test: all
 	$(REBAR) eunit
 
