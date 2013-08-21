@@ -28,9 +28,9 @@
 %% process a function call for each set of iterations in
 %% microseconds.
 run() ->
-    application:start(erlang_js),
+    ok = application:start(erlang_js),
     {ok, Ctx} = js_driver:new(),
-    js:define(Ctx, <<"function add(x, y) { return x + y; }">>, []),
+    ok = js:define(Ctx, <<"function add(x, y) { return x + y; }">>, []),
     Result = [time_calls(Ctx, Count) || Count <- ?COUNTS],
     js_driver:destroy(Ctx),
     Result.
