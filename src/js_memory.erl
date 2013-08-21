@@ -48,7 +48,7 @@ do(new, Count) ->
     do(new, Count - 1).
 
 end_test() ->
-    [erlang:garbage_collect(P) || P <- erlang:processes()],
+    _ = [erlang:garbage_collect(P) || P <- erlang:processes()],
     erlang:memory(total).
 
 display(Memory) ->
