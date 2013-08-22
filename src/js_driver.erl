@@ -73,7 +73,7 @@ new(ThreadStackSize, HeapSize) ->
 %% User supplied initializers must return true or false.
 new(ThreadStackSize, HeapSize, no_json) ->
     Port = open_port({spawn, ?DRIVER_NAME}, [binary]),
-    call_driver(Port, "ij", [ThreadStackSize, HeapSize], 5000),
+    _ = call_driver(Port, "ij", [ThreadStackSize, HeapSize], 5000),
     {ok, Port};
 new(ThreadStackSize, HeapSize, Initializer) when is_function(Initializer) ->
     {ok, Port} = new(ThreadStackSize, HeapSize),
@@ -105,7 +105,7 @@ destroy(Ctx) ->
 %% @doc Destroys a Javascript VM instance and shuts down the underlying Javascript infrastructure.
 %% NOTE: No new VMs can be created after this call is made!
 shutdown(Ctx) ->
-    call_driver(Ctx, "sd", [], 60000),
+    _ = call_driver(Ctx, "sd", [], 60000),
     port_close(Ctx).
 
 %% @spec define_js(port(), binary()) -> ok | {error, any()}
