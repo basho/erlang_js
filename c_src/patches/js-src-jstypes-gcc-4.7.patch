@@ -1,0 +1,16 @@
+diff -udrP js/src/jstypes.h jsm/src/jstypes.h
+--- c_src/js/src/jstypes.h.orig	2008-02-20 05:11:01.000000000 +0000
++++ c_src/js/src/jstypes.h	2013-07-19 19:48:49.000000000 +0000
+@@ -165,7 +165,11 @@
+ # define JS_INLINE __forceinline
+ #elif defined(__GNUC__)
+ # ifndef DEBUG
+-#  define JS_INLINE __attribute__((always_inline))
++#  if __GNUC__ > 4 || ( __GNUC__ == 4 && __GNUC_MINOR__ > 6 )
++#   define JS_INLINE __attribute__((always_inline)) inline
++#  else
++#   define JS_INLINE __attribute__((always_inline))
++#  endif
+ # else
+ #  define JS_INLINE inline
+ # endif
