@@ -45,7 +45,12 @@ function_test_() ->
               P = test_util:get_thing(),
               ?assertMatch(ok, js:define(P, <<"function return_error_property() { return [{\"value\": \"some_value\", \"list\": [{\"error\": \"some_error\"}]}]; }">>)),
               ?assertMatch({ok,[{struct,[{<<"value">>,<<"some_value">>},{<<"list">>,[{struct,[{<<"error">>,<<"some_error">>}]}]}]}]}, js:call(P, <<"return_error_property">>, [])),
-              erlang:unlink(P) end      
+              erlang:unlink(P) end,
+      fun() ->
+              %% Regression test case for github issue 42 - quotes in anonymous functions
+              P = test_util:get_thing(),
+              ?assertMatch({ok, [<<"foo">>, <<"bar">>]}, js:call(P, <<"function(x) { return x.split(\" \"); }">>, [<<"foo bar">>])),
+              erlang:unlink(P) end 
       ]      
      }].
 
