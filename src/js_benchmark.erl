@@ -47,5 +47,5 @@ do_calls(_Ctx, 0) ->
     ok;
 do_calls(Ctx, Count) ->
     CorrectResult = Count * 2,
-    {ok, CorrectResult} = js:call(Ctx, "add", [Count, Count]),
+    {ok, CorrectResult} = js:call(Ctx, <<"add">>, [Count, Count]),
     do_calls(Ctx, Count - 1).
