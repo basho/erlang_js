@@ -79,7 +79,7 @@ void send_immediate_ok_response(spidermonkey_drv_t *dd, const char *call_id) {
   ErlDrvTermData terms[] = {ERL_DRV_BUF2BINARY, (ErlDrvTermData) call_id, strlen(call_id),
                             ERL_DRV_ATOM, dd->atom_ok,
                             ERL_DRV_TUPLE, 2};
-  driver_output_term(dd->port, terms, sizeof(terms) / sizeof(terms[0]));
+  erl_drv_output_term(driver_mk_port(dd->port), terms, sizeof(terms) / sizeof(terms[0]));
 }
 
 #define COPY_DATA(CD, CID, TERMS)                                         \
@@ -253,7 +253,7 @@ ready_async(ErlDrvData handle, ErlDrvThreadData async_data)
   spidermonkey_drv_t *dd = (spidermonkey_drv_t *) handle;
   js_call *call_data = (js_call *) async_data;
 
-  driver_output_term(dd->port,
+  erl_drv_output_term(driver_mk_port(dd->port),
                    call_data->return_terms, call_data->return_term_count);
 
   driver_free_binary(call_data->args);
