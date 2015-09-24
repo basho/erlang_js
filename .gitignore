@@ -4,7 +4,13 @@
 c_src/js
 c_src/system
 c_src/nsprpub
+c_src/driver_comm.d
+c_src/spidermonkey.d
+c_src/spidermonkey_drv.d
+compile
+deps
 docs
 ebin
 .eunit
+.rebar
 tags
