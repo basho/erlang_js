@@ -38,9 +38,9 @@ run() ->
 %% @private
 time_calls(Ctx, Count) ->
     io:format("Starting: ~p~n", [Count]),
-    Start = erlang:now(),
+    Start = erlang_js_time:timestamp(),
     do_calls(Ctx, Count),
-    timer:now_diff(erlang:now(), Start) / Count.
+    timer:now_diff(erlang_js_time:timestamp(), Start) / Count.
 
 %% @private
 do_calls(_Ctx, 0) ->
