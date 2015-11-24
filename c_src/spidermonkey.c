@@ -130,7 +130,7 @@ JSBool js_log(JSContext *cx, uintN argc, jsval *vp) {
       JS_SET_RVAL(cx, vp, JSVAL_FALSE);
     }
   }
-  return JSVAL_TRUE;
+  return JS_TRUE;
 }
 
 void sm_configure_locale(void) {
