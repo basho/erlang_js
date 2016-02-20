@@ -1,4 +1,7 @@
 * erlang_js
+
+  #+ATTR_HTML: title="Join the chat at https://gitter.im/basho/erlang_js"
+  [[https://gitter.im/basho/erlang_js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge][file:https://badges.gitter.im/basho/erlang_js.svg]]
 ** Overview
 
    [[http://travis-ci.org/basho/erlang_js][Travis-CI]] :: [[https://secure.travis-ci.org/basho/erlang_js.png]]
