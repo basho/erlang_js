@@ -28,9 +28,10 @@ void free_error(spidermonkey_state *state);
 /* The class of the global object. */
 static JSClass global_class = {
     "global", JSCLASS_GLOBAL_FLAGS,
-    JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
-    JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, JS_FinalizeStub,
-    JSCLASS_NO_OPTIONAL_MEMBERS
+    JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_StrictPropertyStub,  
+    JS_EnumerateStub, JS_ResolveStub, JS_ConvertStub, NULL,
+    NULL /* checkAccess */, NULL /* call */, NULL /* hasInstance */, NULL /* construct */, NULL,
+    { NULL }
 };
 
 char *copy_string(const char *source) {
@@ -41,19 +42,23 @@ char *copy_string(const char *source) {
   return retval;
 }
 
-char *copy_jsstring(JSString *source) {
-  char *buf = JS_GetStringBytes(source);
-  return copy_string(buf);
+char *copy_jsstring(JSContext *cx, JSString *source) {
+  char *buf = JS_EncodeString(cx, source);
+  char *retval = copy_string(buf);
+  JS_free(cx, buf);
+  return retval;
 }
 
 void begin_request(spidermonkey_vm *vm) {
-  JS_SetContextThread(vm->context);
+  //XXX: not available
+  //JS_SetContextThread(vm->context);
   JS_BeginRequest(vm->context);
 }
 
 void end_request(spidermonkey_vm *vm) {
   JS_EndRequest(vm->context);
-  JS_ClearContextThread(vm->context);
+  //XXX: not available
+  //JS_ClearContextThread(vm->context);
 }
 
 void on_error(JSContext *context, const char *message, JSErrorReport *report) {
@@ -78,7 +83,7 @@ void on_error(JSContext *context, const char *message, JSErrorReport *report) {
   }
 }
 
-JSBool on_branch(JSContext *context, JSScript *script) {
+JSBool on_branch(JSContext *context) {
   JSBool return_value = JS_TRUE;
   spidermonkey_state *state = (spidermonkey_state *) JS_GetContextPrivate(context);
   state->branch_count++;
@@ -87,7 +92,7 @@ JSBool on_branch(JSContext *context, JSScript *script) {
       return_value = JS_FALSE;
   }
   else if (state->branch_count == 550) {
-    JS_GC(context);
+    JS_GC(JS_GetRuntime(context));
     state->branch_count = 0;
   }
   else if(state->branch_count % 100 == 0) {
@@ -108,7 +113,9 @@ void write_timestamp(FILE *fd) {
           tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
 }
 
-JSBool js_log(JSContext *cx, uintN argc, jsval *vp) {
+// under mozjs17, 'uintN' has been deprecated in favor of 'unsigned'
+// http://sourceforge.net/p/mediatomb/discussion/440751/thread/9945a07d/#177d
+JSBool js_log(JSContext *cx, unsigned argc, jsval *vp) {
   if (argc != 2) {
     JS_SET_RVAL(cx, vp, JSVAL_FALSE);
   }
@@ -116,8 +123,8 @@ JSBool js_log(JSContext *cx, uintN argc, jsval *vp) {
     jsval *argv = JS_ARGV(cx, vp);
     jsval jsfilename = argv[0];
     jsval jsoutput = argv[1];
-    char *filename = JS_GetStringBytes(JS_ValueToString(cx, jsfilename));
-    char *output = JS_GetStringBytes(JS_ValueToString(cx, jsoutput));
+    char *filename = JS_EncodeString(cx, JS_ValueToString(cx, jsfilename));
+    char *output = JS_EncodeString(cx, JS_ValueToString(cx, jsoutput));
     FILE *fd = fopen(filename, "a+");
     if (fd != NULL) {
       write_timestamp(fd);
@@ -130,7 +137,7 @@ JSBool js_log(JSContext *cx, uintN argc, jsval *vp) {
       JS_SET_RVAL(cx, vp, JSVAL_FALSE);
     }
   }
-  return JSVAL_TRUE;
+  return JS_TRUE;
 }
 
 void sm_configure_locale(void) {
@@ -148,21 +155,23 @@ spidermonkey_vm *sm_initialize(long thread_stack, long heap_size) {
   JS_SetGCParameter(vm->runtime, JSGC_MAX_BYTES, heap_size);
   JS_SetGCParameter(vm->runtime, JSGC_MAX_MALLOC_BYTES, gc_size);
   vm->context = JS_NewContext(vm->runtime, 8192);
-  JS_SetScriptStackQuota(vm->context, thread_stack);
+  // XXX: changed from JS_SetNativeStackQuota, don't know if it's ok
+  JS_SetNativeStackQuota(JS_GetRuntime(vm->context), thread_stack);
 
   begin_request(vm);
   JS_SetOptions(vm->context, JSOPTION_VAROBJFIX);
   JS_SetOptions(vm->context, JSOPTION_STRICT);
   JS_SetOptions(vm->context, JSOPTION_COMPILE_N_GO);
   JS_SetOptions(vm->context, JSVERSION_LATEST);
-  vm->global = JS_NewObject(vm->context, &global_class, NULL, NULL);
+
+  vm->global = JS_NewGlobalObject(vm->context, &global_class, NULL);
   JS_InitStandardClasses(vm->context, vm->global);
   JS_SetErrorReporter(vm->context, on_error);
-  JS_SetBranchCallback(vm->context, on_branch);
+  JS_SetOperationCallback(vm->context, on_branch);
   JS_SetContextPrivate(vm->context, state);
   JSNative funptr = (JSNative) &js_log;
   JS_DefineFunction(vm->context, JS_GetGlobalObject(vm->context), "ejsLog", funptr,
-                    0, JSFUN_FAST_NATIVE);
+                    0, 0);
   end_request(vm);
 
   return vm;
@@ -280,16 +289,20 @@ char *sm_eval(spidermonkey_vm *vm, const char *filename, const char *code, int h
       if (handle_retval) {
         if (JSVAL_IS_STRING(result)) {
           JSString *str = JS_ValueToString(vm->context, result);
-          retval = copy_jsstring(str);
-        }
-        else if(strcmp(JS_GetStringBytes(JS_ValueToString(vm->context, result)), "undefined") == 0) {
-          retval = copy_string("{\"error\": \"Expression returned undefined\", \"lineno\": 0, \"source\": \"unknown\"}");
+          retval = copy_jsstring(vm->context, str);
         }
         else {
-          retval = copy_string("{\"error\": \"non-JSON return value\", \"lineno\": 0, \"source\": \"unknown\"}");
+            char *tmp = JS_EncodeString(vm->context, JS_ValueToString(vm->context, result));
+            if(strcmp(tmp, "undefined") == 0) {
+                retval = copy_string("{\"error\": \"Expression returned undefined\", \"lineno\": 0, \"source\": \"unknown\"}");
+            }
+            else {
+                retval = copy_string("{\"error\": \"non-JSON return value\", \"lineno\": 0, \"source\": \"unknown\"}");
+            }
+
+            JS_free(vm->context, tmp);
         }
       }
-      JS_DestroyScript(vm->context, script);
     }
     else {
       retval = error_to_json(state->error);
