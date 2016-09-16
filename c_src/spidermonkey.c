@@ -21,7 +21,6 @@
 
 #include "driver_comm.h"
 #include "spidermonkey.h"
-#include "erl_compatibility.h"
 
 void free_error(spidermonkey_state *state);
 
