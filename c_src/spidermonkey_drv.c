@@ -21,7 +21,6 @@
 #include "spidermonkey.h"
 #include "config.h"
 #include "driver_comm.h"
-#include "erl_compatibility.h"
 
 typedef struct _spidermonkey_drv_t {
   ErlDrvPort port;
