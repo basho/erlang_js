@@ -3,6 +3,7 @@
 -export([port_setup/0, port_setup/1, port_teardown/1, null_teardown/1, get_thing/0]).
 
 port_setup() ->
+    erlang_js:start(),
     port_setup(8).
 
 port_setup(Size) ->
