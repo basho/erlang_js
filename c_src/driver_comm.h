@@ -30,7 +30,11 @@ char *read_string(char **data);
 
 /* Wrapper around driver_alloc() that checks  */
 /* for OOM.                                   */
+#if ERL_EXIT
 void erl_exit(int n, char*, ...);
+#else
+void erts_exit(int n, char*, ...);
+#endif
 void *ejs_alloc(ErlDrvSizeT size);
 
 #endif
