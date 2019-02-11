@@ -18,7 +18,7 @@
 %% args into JSON before sending them to Javascript. While this does
 %% incur a certain amount of overhead it has the benefit of (mostly)
 %% preserving types as they roundtrip between Erlang and Javascript.
-%% Of course, this also means all Erlang values MUST BE convertable
+%% Of course, this also means all Erlang values MUST BE convertible
 %% into JSON. In practice, this is less restricting than it sounds.
 -module(js).
 

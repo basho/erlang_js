@@ -14,8 +14,8 @@
 %%    limitations under the License.
 
 %% @doc This module manages all of the low-level details surrounding the
-%% linked-in driver. It is reponsible for loading and unloading the driver
-%% as needed. This module is also reponsible for creating and destroying
+%% linked-in driver. It is responsible for loading and unloading the driver
+%% as needed. This module is also responsible for creating and destroying
 %% instances of Javascript VMs.
 
 -module(js_driver).
