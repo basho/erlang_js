@@ -5,7 +5,7 @@ UNAME	:= $(shell uname -s)
 TAR		?= tar
 GUNZIP		?= gunzip
 SMONKEY_VER	:= 1.8.0-rc1
-NSPR_VER	:= 4.8
+NSPR_VER	:= 4.21
 
 ifeq ($(UNAME),SunOS)
 	PATCH	?= gpatch
