@@ -50,7 +50,7 @@
 +OS_CFLAGS = -DXP_UNIX -DSVR4 -DSYSV -D_BSD_SOURCE -DPOSIX_SOURCE -DHAVE_LOCALTIME_R
 +
 +RANLIB = echo
-+MKSHLIB = $(LD) -shared $(XMKSHLIBOPTS)
++MKSHLIB = $(CC) -shared $(XMKSHLIBOPTS)
 +
 +#.c.o:
 +#      $(CC) -c -MD $*.d $(CFLAGS) $<
